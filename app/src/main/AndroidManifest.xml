@@ -9,6 +9,8 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <application
         android:name=".util.AutomataApplication"
         android:allowBackup="true"
@@ -52,6 +54,9 @@
                 android:value="true" />
         </service>
 
+        <service android:name=".ui.overlay.SubtitleOverlayService"
+                 android:exported="false" />
+
         <activity
             android:name=".ui.main.MainActivity"
             android:launchMode="singleTop"
@@ -65,6 +70,10 @@
         </activity>
 
         <receiver android:name=".runner.ScriptRunnerNotification$NotificationReceiver" />
+
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="ocr,ocr_chinese,ocr_japanese" />
     </application>
 
 </manifest>

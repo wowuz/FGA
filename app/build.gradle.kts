@@ -93,6 +93,7 @@ dependencies {
     implementation(project(":libautomata"))
     implementation(project(":scripts"))
     implementation(project(":prefs"))
+    ksp(project(":libautomata"))
 
 
     implementation(libs.kotlin.stdlib)
@@ -144,4 +145,10 @@ dependencies {
     implementation(libs.coil)
     implementation(libs.coil.gif)
 
+    implementation("com.google.android.gms:play-services-mlkit-text-recognition:19.0.0")
+    implementation("com.google.android.gms:play-services-mlkit-text-recognition-chinese:16.0.1")
+    implementation("com.google.android.gms:play-services-mlkit-text-recognition-japanese:16.0.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.10.2")
+
+    implementation("com.google.ai.client.generativeai:generativeai:0.9.0") // Check for the latest version
 }

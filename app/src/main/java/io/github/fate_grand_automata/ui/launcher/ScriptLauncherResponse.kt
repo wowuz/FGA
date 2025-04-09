@@ -17,6 +17,8 @@ sealed class ScriptLauncherResponse {
     data object Battle : ScriptLauncherResponse()
 
     data object ServantEnhancement : ScriptLauncherResponse()
+
+    data object Translate : ScriptLauncherResponse()
 }
 
 class ScriptLauncherResponseBuilder(

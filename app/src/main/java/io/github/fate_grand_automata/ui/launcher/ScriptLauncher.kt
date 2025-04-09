@@ -40,6 +40,7 @@ fun ScriptLauncher(
                 ScriptModeEnum.PresentBox -> giftBoxLauncher(prefs, modifier)
                 ScriptModeEnum.CEBomb -> ceBombLauncher(prefs, modifier)
                 ScriptModeEnum.ServantLevel -> servantLevelLauncher(prefsCore.servantEnhancement, modifier)
+                ScriptModeEnum.Translate -> translateLauncher(prefs, modifier)
             }
 
             HorizontalDivider()
@@ -57,6 +58,11 @@ fun ScriptLauncher(
                 }
 
                 Row {
+                    TextButton(onClick = { onResponse(ScriptLauncherResponse.Translate) }) {
+                        // TODO: Localize this string
+                        Text("Start Translating")
+                    }
+
                     TextButton(onClick = { onResponse(ScriptLauncherResponse.Cancel) }) {
                         Text(stringResource(android.R.string.cancel))
                     }

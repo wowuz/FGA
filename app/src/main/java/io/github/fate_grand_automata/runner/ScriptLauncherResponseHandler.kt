@@ -54,6 +54,10 @@ class ScriptLauncherResponseHandler @Inject constructor(
             is ScriptLauncherResponse.ServantEnhancement -> {
                 ScriptModeEnum.ServantLevel
             }
+
+            is ScriptLauncherResponse.Translate -> {
+                ScriptModeEnum.Translate
+            }
         }
     }
 }

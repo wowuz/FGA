@@ -22,6 +22,7 @@ import io.github.fate_grand_automata.scripts.entrypoints.AutoGiftBox
 import io.github.fate_grand_automata.scripts.entrypoints.AutoLottery
 import io.github.fate_grand_automata.scripts.entrypoints.AutoServantLevel
 import io.github.fate_grand_automata.scripts.entrypoints.SupportImageMaker
+import io.github.fate_grand_automata.scripts.entrypoints.AutoTranslate
 import io.github.fate_grand_automata.scripts.enums.GameServer
 import io.github.fate_grand_automata.scripts.enums.ScriptModeEnum
 import io.github.fate_grand_automata.scripts.prefs.IPreferences
@@ -277,6 +278,7 @@ class ScriptManager @Inject constructor(
             ScriptModeEnum.SupportImageMaker -> entryPoint.supportImageMaker()
             ScriptModeEnum.CEBomb -> entryPoint.ceBomb()
             ScriptModeEnum.ServantLevel -> entryPoint.servantLevel()
+            ScriptModeEnum.Translate -> entryPoint.translate()
         }
 
     enum class PauseAction {
