@@ -24,7 +24,7 @@ class TesseractOcrService @Inject constructor(
         tessApi.init(context.filesDir.absolutePath, "eng")
     }
 
-    override suspend fun detectText(pattern: Pattern): String {
+    override fun detectText(pattern: Pattern): String {
         synchronized(tessApi) {
             (pattern as DroidCvPattern).asBitmap().use { bmp ->
                 tessApi.setImage(bmp)

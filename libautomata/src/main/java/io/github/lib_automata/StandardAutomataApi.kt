@@ -54,7 +54,7 @@ class StandardAutomataApi @Inject constructor(
 
     override fun Region.isBlack() = imageMatcher.isBlack(this)
 
-    override suspend fun Region.detectText(outlinedText: Boolean): String {
+    override fun Region.detectText(outlinedText: Boolean): String {
         screenshotManager.getScreenshot()
             .crop(transform.toImage(this))
             .threshold(0.5)

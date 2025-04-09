@@ -81,13 +81,15 @@ class AutoTranslate @Inject constructor(
         // WARNING: This gets the RAW screenshot. The transformer might expect
         // coordinates relative to the scaled/cropped image usually provided
         // by ScreenshotManager. This might lead to incorrect cropping.
-        val currentRawScreenshot = screenshotService.takeScreenshot()
+        // val currentRawScreenshot = screenshotService.takeScreenshot()
 
         // Transform the script region to image coordinates (intended for the scaled image)
-        val imageRegion = transformer.toImage(ocrRegion)
+        // val imageRegion = transformer.toImage(ocrRegion)
 
         // Crop the RAW screenshot using coordinates meant for the scaled image
-        val regionOfInterestPattern = currentRawScreenshot.crop(imageRegion)
+        // val regionOfInterestPattern = currentRawScreenshot.crop(imageRegion)
+
+        val regionOfInterestPattern = screenshotService.takeScreenshot()
         regionOfInterestPattern.tag = "OCR_Translate_Raw_Service"
         // --- End direct screenshotService usage ---
 

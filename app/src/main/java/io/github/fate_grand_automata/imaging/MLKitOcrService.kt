@@ -14,6 +14,8 @@ import io.github.lib_automata.dagger.ScriptScope
 import kotlinx.coroutines.tasks.await
 import timber.log.Timber
 import javax.inject.Inject
+import com.google.android.gms.tasks.Tasks
+import java.util.concurrent.TimeUnit
 
 /**
  * OCR Service implementation using ML Kit Text Recognition.
@@ -29,7 +31,7 @@ class MLKitOcrService @Inject constructor(
     // When using Japanese script library
     private val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
 
-    override suspend fun detectText(pattern: Pattern): String {
+    override fun detectText(pattern: Pattern): String {
         // ML Kit works with Bitmaps. DroidCvPattern needs conversion.
         val bitmap = (pattern as? DroidCvPattern)?.asBitmap()
                 ?: run {
@@ -40,22 +42,17 @@ class MLKitOcrService @Inject constructor(
         val inputImage = InputImage.fromBitmap(bitmap, 0)
         var recognizedText = ""
         try {
-            // ML Kit's process method returns a Task, await() makes it suspend until result.
-            // Needs kotlinx-coroutines-play-services dependency.
-            // For simplicity, showing a blocking approach (not ideal for UI thread).
-            val result = recognizer.process(inputImage)
-                .addOnSuccessListener { visionText ->
-                    recognizedText = visionText.text
-                    Timber.d("ML Kit OCR successful: ${recognizedText.lines().size} lines")
-                }
-                .addOnFailureListener { e ->
-                    Timber.e(e, "ML Kit OCR failed")
-                    // Handle the error appropriately
-                }
-            // A crude way to block until the task finishes for this example.
-            // Replace with proper coroutine handling (e.g., viewModelScope.launch).
-            @Suppress("BlockingMethodInNonBlockingContext") // Example only
-            kotlinx.coroutines.runBlocking { kotlinx.coroutines.tasks.await(result) }
+            // WARNING: This uses the BLOCKING Tasks.await().
+            // Ensure this detectText method is called from a background thread
+            // to avoid blocking the main UI thread.
+            val resultTask = recognizer.process(inputImage)
+
+            // Block the current thread until the task completes (or times out)
+            // Adjust timeout as needed (e.g., 5 seconds)
+            val visionText = Tasks.await(resultTask, 5, TimeUnit.SECONDS)
+
+            recognizedText = visionText.text
+            Timber.d("ML Kit OCR successful: ${recognizedText}")
         } catch (e: Exception) {
             Timber.e(e, "Error during ML Kit OCR processing")
         } finally {
