@@ -2,12 +2,16 @@ package io.github.fate_grand_automata.scripts.entrypoints
 
 import io.github.fate_grand_automata.scripts.IFgoAutomataApi
 import io.github.fate_grand_automata.scripts.ISubtitleNotifier
+import io.github.fate_grand_automata.scripts.prefs.IPreferences
 import io.github.lib_automata.EntryPoint
 import io.github.lib_automata.ExitManager
 import io.github.lib_automata.OcrService
 import io.github.lib_automata.Translator
 import io.github.lib_automata.Region
+// Removed: import io.github.lib_automata.ScreenshotManager
+import io.github.lib_automata.ScreenshotService // Import ScreenshotService
 import io.github.lib_automata.ScriptAbortException
+import io.github.lib_automata.Transformer
 import io.github.lib_automata.dagger.ScriptScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,22 +26,26 @@ import kotlin.time.Duration.Companion.seconds
 
 @ScriptScope
 class AutoTranslate @Inject constructor(
+    // Dependencies required by EntryPoint and IFgoAutomataApi
     exitManager: ExitManager,
     api: IFgoAutomataApi,
+    // Specific dependencies for this script
     private val ocrService: OcrService,
     private val translator: Translator,
-    private val subtitleNotifier: ISubtitleNotifier
+    private val subtitleNotifier: ISubtitleNotifier,
+    // Explicitly inject ScreenshotService and Transformer
+    private val screenshotService: ScreenshotService, // Inject ScreenshotService directly
+    private val transformer: Transformer
 ) : EntryPoint(exitManager), IFgoAutomataApi by api { // Implement IFgoAutomataApi
 
-    // --- Configuration (Needs to be moved to Prefs/UI) ---
-    private val ocrRegion = Region(100, 50, 2360, 200)
-    private val targetLanguage = "en"
+    // --- Read Configuration from IPreferences ---
+    private val ocrRegion = prefs.translation.getOcrRegion()
+    private val targetLanguage = prefs.translation.targetLanguage
     private val checkInterval = 500.milliseconds
     // --- End Configuration ---
 
     private var translationJob: Job? = null
     private var previousOcrText: String = ""
-
     private val scriptScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 
     class ExitException(override val message: String) : Exception(message)
@@ -45,6 +53,10 @@ class AutoTranslate @Inject constructor(
     override fun script(): Nothing {
         subtitleNotifier.start()
         try {
+            if (prefs.translation.apiKey.isBlank()) {
+                throw ExitException("Gemini API Key is not set in More Options -> Advanced.")
+            }
+
             while (scriptScope.isActive) {
                 exitManager.checkExitRequested()
                 checkAndTranslateOcrRegion()
@@ -52,8 +64,9 @@ class AutoTranslate @Inject constructor(
             }
         } catch (e: ScriptAbortException) {
             throw ExitException("Script aborted")
+        } catch (e: ExitException) {
+            throw e
         } catch (e: Exception) {
-            // Log exception if logger was injected
             throw ExitException("Unexpected error: ${e.message}")
         } finally {
             translationJob?.cancel()
@@ -64,9 +77,19 @@ class AutoTranslate @Inject constructor(
     }
 
     private fun checkAndTranslateOcrRegion() {
-        // Use the getPattern() extension function available via IFgoAutomataApi
-        // This handles getting the screenshot and cropping in image coordinates correctly.
-        val regionOfInterestPattern = ocrRegion.getPattern(tag = "OCR_Translate") // [source: 2262, 2380]
+        // --- Using screenshotService directly ---
+        // WARNING: This gets the RAW screenshot. The transformer might expect
+        // coordinates relative to the scaled/cropped image usually provided
+        // by ScreenshotManager. This might lead to incorrect cropping.
+        val currentRawScreenshot = screenshotService.takeScreenshot()
+
+        // Transform the script region to image coordinates (intended for the scaled image)
+        val imageRegion = transformer.toImage(ocrRegion)
+
+        // Crop the RAW screenshot using coordinates meant for the scaled image
+        val regionOfInterestPattern = currentRawScreenshot.crop(imageRegion)
+        regionOfInterestPattern.tag = "OCR_Translate_Raw_Service"
+        // --- End direct screenshotService usage ---
 
         regionOfInterestPattern.use { pattern -> // Ensure the pattern is closed
             val text = ocrService.detectText(pattern).trim()

@@ -9,6 +9,7 @@ import io.github.fate_grand_automata.scripts.prefs.IPerServerConfigPrefs
 import io.github.fate_grand_automata.scripts.prefs.IPreferences
 import io.github.fate_grand_automata.scripts.prefs.IServantEnhancementPreferences
 import io.github.fate_grand_automata.scripts.prefs.ISupportPreferencesCommon
+import io.github.fate_grand_automata.scripts.prefs.ITranslationPreferences
 import io.github.lib_automata.PlatformPrefs
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -208,5 +209,15 @@ class PreferencesImpl @Inject constructor(
 
         override val swipeDuration by prefs.swipeDuration
             .map { it.milliseconds }
+    }
+
+    override val translation: ITranslationPreferences = object : ITranslationPreferences {
+        override val apiKey get() = prefs.autoTranslateApiKey.get()
+        override val targetLanguage get() = prefs.autoTranslateTargetLanguage.get().ifBlank { "en" }
+        override val ocrRegionX get() = prefs.autoTranslateOcrRegionX.get()
+        override val ocrRegionY get() = prefs.autoTranslateOcrRegionY.get()
+        override val ocrRegionWidth get() = prefs.autoTranslateOcrRegionWidth.get()
+        override val ocrRegionHeight get() = prefs.autoTranslateOcrRegionHeight.get()
+        // getOcrRegion() is implemented in the interface itself
     }
 }

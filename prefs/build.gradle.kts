@@ -36,4 +36,6 @@ dependencies {
     ksp(libs.dagger.hilt.compiler)
 
     api(libs.fredporciuncula.flow.preferences)
+
+    implementation("androidx.preference:preference-ktx:1.2.1")
 }

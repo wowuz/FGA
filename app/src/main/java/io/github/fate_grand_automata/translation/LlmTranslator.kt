@@ -44,7 +44,7 @@ class LlmTranslator @Inject constructor(
         // Construct the prompt for the Gemini model
         val prompt = "Translate the following text to $targetLanguage: \"$text\""
 
-        if (apiKey == "YOUR_GEMINI_API_KEY") {
+        if (apiKey == "YOUR_GEMINI_API_KEY" || apiKey.isBlank()) {
             // Timber.e("Gemini API Key not set. Please replace the placeholder.")
             return prompt // Provide prompt message for debuging
         }

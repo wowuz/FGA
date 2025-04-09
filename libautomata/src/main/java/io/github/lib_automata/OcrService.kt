@@ -1,5 +1,5 @@
 package io.github.lib_automata
 
 interface OcrService {
-    fun detectText(pattern: Pattern): String
+    suspend fun detectText(pattern: Pattern): String
 }

@@ -71,9 +71,9 @@
 
         <receiver android:name=".runner.ScriptRunnerNotification$NotificationReceiver" />
 
-        <meta-data
+        <!--meta-data
             android:name="com.google.mlkit.vision.DEPENDENCIES"
-            android:value="ocr,ocr_chinese,ocr_japanese" />
+            android:value="ocr,ocr_chinese,ocr_japanese" /-->
     </application>
 
 </manifest>

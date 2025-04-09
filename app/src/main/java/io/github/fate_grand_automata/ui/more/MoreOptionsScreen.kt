@@ -32,10 +32,14 @@ fun MoreOptionsScreen(
         vm.pickedDirectory(it)
     }
 
+    // Get screen resolution from ViewModel
+    val screenResolution by vm.screenResolution
+
     MoreOptionsContent(
         vm = vm,
         goToFineTune = navigateToFineTune,
-        pickDirectory = { pickDirectory.launch(Uri.EMPTY) }
+        pickDirectory = { pickDirectory.launch(Uri.EMPTY) },
+        screenResolution = screenResolution // Pass resolution to content
     )
 }
 
@@ -43,7 +47,8 @@ fun MoreOptionsScreen(
 private fun MoreOptionsContent(
     vm: MoreOptionsViewModel,
     goToFineTune: () -> Unit,
-    pickDirectory: () -> Unit
+    pickDirectory: () -> Unit,
+    screenResolution: String // Receive resolution
 ) {
     Column(
         modifier = Modifier.fillMaxSize()
@@ -88,7 +93,8 @@ private fun MoreOptionsContent(
                             MoreSettingsGroup.Advanced -> {
                                 advancedGroup(
                                     vm.prefsCore,
-                                    goToFineTune = goToFineTune
+                                    goToFineTune = goToFineTune,
+                                    screenResolution = screenResolution
                                 )
                             }
                         }

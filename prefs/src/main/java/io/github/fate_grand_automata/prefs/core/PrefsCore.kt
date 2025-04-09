@@ -126,6 +126,13 @@ class PrefsCore @Inject constructor(
         }
     )
 
+    val autoTranslateApiKey = maker.string("auto_translate_api_key", "YOUR_GEMINI_API_KEY") // Default to empty
+    val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", "Simplified Chinese") // Default to English
+    val autoTranslateOcrRegionX = maker.int("auto_translate_ocr_region_x", 100) // Default X
+    val autoTranslateOcrRegionY = maker.int("auto_translate_ocr_region_y", 50)  // Default Y
+    val autoTranslateOcrRegionWidth = maker.int("auto_translate_ocr_region_width", 2360) // Default Width
+    val autoTranslateOcrRegionHeight = maker.int("auto_translate_ocr_region_height", 200) // Default Height
+
     private val battleConfigMap = mutableMapOf<String, BattleConfigCore>()
 
     fun forBattleConfig(id: String): BattleConfigCore =

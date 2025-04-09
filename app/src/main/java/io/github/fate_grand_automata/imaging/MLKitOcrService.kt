@@ -2,6 +2,7 @@ package io.github.fate_grand_automata.imaging
 
 import android.content.Context
 import android.graphics.Bitmap
+import androidx.compose.ui.semantics.text
 import com.google.mlkit.vision.common.InputImage
 import com.google.mlkit.vision.text.TextRecognition
 import com.google.mlkit.vision.text.latin.TextRecognizerOptions
@@ -28,7 +29,7 @@ class MLKitOcrService @Inject constructor(
     // When using Japanese script library
     private val recognizer = TextRecognition.getClient(JapaneseTextRecognizerOptions.Builder().build())
 
-    override fun detectText(pattern: Pattern): String {
+    override suspend fun detectText(pattern: Pattern): String {
         // ML Kit works with Bitmaps. DroidCvPattern needs conversion.
         val bitmap = (pattern as? DroidCvPattern)?.asBitmap()
                 ?: run {
@@ -38,29 +39,23 @@ class MLKitOcrService @Inject constructor(
 
         val inputImage = InputImage.fromBitmap(bitmap, 0)
         var recognizedText = ""
-
-        // Use runBlocking or appropriate coroutine scope if needed,
-        // but OCR might be called from background threads already.
-        // Here, we'll use a simple blocking call for demonstration.
-        // In a real app, handle the async nature properly.
         try {
             // ML Kit's process method returns a Task, await() makes it suspend until result.
             // Needs kotlinx-coroutines-play-services dependency.
             // For simplicity, showing a blocking approach (not ideal for UI thread).
             val result = recognizer.process(inputImage)
-                    .addOnSuccessListener { visionText ->
+                .addOnSuccessListener { visionText ->
                     recognizedText = visionText.text
-                Timber.d("ML Kit OCR successful: ${recognizedText.lines().size} lines")
-            }
+                    Timber.d("ML Kit OCR successful: ${recognizedText.lines().size} lines")
+                }
                 .addOnFailureListener { e ->
                     Timber.e(e, "ML Kit OCR failed")
-                // Handle the error appropriately
-            }
-
+                    // Handle the error appropriately
+                }
             // A crude way to block until the task finishes for this example.
             // Replace with proper coroutine handling (e.g., viewModelScope.launch).
-            // @Suppress("BlockingMethodInNonBlockingContext") // Example only
-            //         kotlinx.coroutines.runBlocking { kotlinx.coroutines.tasks.await(result) }
+            @Suppress("BlockingMethodInNonBlockingContext") // Example only
+            kotlinx.coroutines.runBlocking { kotlinx.coroutines.tasks.await(result) }
         } catch (e: Exception) {
             Timber.e(e, "Error during ML Kit OCR processing")
         } finally {

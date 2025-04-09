@@ -60,7 +60,7 @@ interface AutomataApi {
 
     fun Region.isBlack(): Boolean
 
-    fun Region.detectText(outlinedText: Boolean = false): String
+    suspend fun Region.detectText(outlinedText: Boolean = false): String
 
     fun Map<Pattern, Region>.exists(
         timeout: Duration = Duration.ZERO,
