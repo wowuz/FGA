@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fullscreen
 import androidx.compose.material.icons.filled.Translate
@@ -32,6 +33,8 @@ import io.github.fate_grand_automata.prefs.core.Pref
 import io.github.fate_grand_automata.prefs.core.PrefsCore
 import io.github.fate_grand_automata.root.SuperUser
 import io.github.fate_grand_automata.ui.Stepper
+import io.github.fate_grand_automata.ui.battle_config_item.PartySelectionDialogContent
+import io.github.fate_grand_automata.ui.dialog.FgaDialog
 import io.github.fate_grand_automata.ui.icon
 import io.github.fate_grand_automata.ui.prefs.ListPreference
 import io.github.fate_grand_automata.ui.prefs.Preference
@@ -135,70 +138,78 @@ fun LazyListScope.advancedGroup(
 
     item {
         prefs.autoTranslateApiKey.EditTextPreference(
-            title = "Gemini API Key", // TODO: Localize
+            title = "Gemini API Key",
+            summary = {"saved as plein text, not safe"}, // TODO: Localize
             validate = { it.isNotBlank() },
             icon = icon(R.drawable.ic_key),
-            singleLine = true
+            singleLine = true,
+            isPassword = true
         )
     }
 
     item {
         // Consider making this a ListPreference with common language codes
         prefs.autoTranslateTargetLanguage.EditTextPreference(
-            title = "Target Language Code", // TODO: Localize
-            icon = icon(Icons.Default.Translate),
-            singleLine = true
-        )
+            title = "Translation prompt", // TODO: Localize
+            icon = icon(Icons.Default.Translate),)
     }
 
     item {
         Preference(
-            // *** FIX: Wrap title string in Text composable ***
-            title = { Text("OCR Region") }, // TODO: Localize
-            summary = {
-                Column {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        prefs.autoTranslateOcrRegionX.StepperPreference(title = "X", valueRange = 0..3000)
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        prefs.autoTranslateOcrRegionY.StepperPreference(title = "Y", valueRange = 0..2000)
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        prefs.autoTranslateOcrRegionWidth.StepperPreference(title = "Width", valueRange = 10..3000)
-                    }
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        prefs.autoTranslateOcrRegionHeight.StepperPreference(title = "Height", valueRange = 10..2000)
-                    }
-                    Text(
-                        screenResolution, // Display the resolution hint
-                        style = MaterialTheme.typography.bodySmall,
-                        modifier = Modifier.padding(top = 4.dp)
-                    )
-                    Text(
-                        "Coordinates are based on FGA's internal 1440p landscape system.", // TODO: Localize
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
-            },
-            icon = icon(R.drawable.ic_screenshot)
+            title = "Reset translation prompt",
+            icon = icon(Icons.Default.Translate),
+            onClick = {prefs.autoTranslateTargetLanguage.resetToDefault()}
         )
     }
+
+    // Not Used preferences
+    // item {
+    //     Preference(
+    //         title = { Text("OCR Region") },
+    //         summary = {
+    //             Column {
+    //                 Row(
+    //                     verticalAlignment = Alignment.CenterVertically,
+    //                     horizontalArrangement = Arrangement.SpaceBetween,
+    //                     modifier = Modifier.fillMaxWidth()
+    //                 ) {
+    //                     prefs.autoTranslateOcrRegionX.StepperPreference(title = "X", valueRange = 0..3000)
+    //                 }
+    //                 Row(
+    //                     verticalAlignment = Alignment.CenterVertically,
+    //                     horizontalArrangement = Arrangement.SpaceBetween,
+    //                     modifier = Modifier.fillMaxWidth()
+    //                 ) {
+    //                     prefs.autoTranslateOcrRegionY.StepperPreference(title = "Y", valueRange = 0..2000)
+    //                 }
+    //                 Row(
+    //                     verticalAlignment = Alignment.CenterVertically,
+    //                     horizontalArrangement = Arrangement.SpaceBetween,
+    //                     modifier = Modifier.fillMaxWidth()
+    //                 ) {
+    //                     prefs.autoTranslateOcrRegionWidth.StepperPreference(title = "Width", valueRange = 10..3000)
+    //                 }
+    //                 Row(
+    //                     verticalAlignment = Alignment.CenterVertically,
+    //                     horizontalArrangement = Arrangement.SpaceBetween,
+    //                     modifier = Modifier.fillMaxWidth()
+    //                 ) {
+    //                     prefs.autoTranslateOcrRegionHeight.StepperPreference(title = "Height", valueRange = 10..2000)
+    //                 }
+    //                 Text(
+    //                     screenResolution, // Display the resolution hint
+    //                     style = MaterialTheme.typography.bodySmall,
+    //                     modifier = Modifier.padding(top = 4.dp)
+    //                 )
+    //                 Text(
+    //                     "Coordinates are based on FGA's internal 1440p landscape system.", // TODO: Localize
+    //                     style = MaterialTheme.typography.bodySmall
+    //                 )
+    //             }
+    //         },
+    //         icon = icon(R.drawable.ic_screenshot)
+    //     )
+    // }
 }
 
 // Extracted Game Area logic for clarity

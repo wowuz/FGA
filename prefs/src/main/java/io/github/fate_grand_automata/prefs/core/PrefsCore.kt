@@ -126,8 +126,20 @@ class PrefsCore @Inject constructor(
         }
     )
 
-    val autoTranslateApiKey = maker.string("auto_translate_api_key", "YOUR_GEMINI_API_KEY") // Default to empty
-    val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", "Simplified Chinese") // Default to English
+    val defaultTranslatePromptPrefix = "You are a highly skilled translation engine." +
+            " Your function is to translate OCR texts from Fate Grand Order"+
+            " accurately into Simplified Chinese," +
+            " ensuring that the original tone and cultural nuances are preserved." +
+            " Please also try to correct the possibly in-accurate OCR recognizing." +
+            " You are expert in the Type-moon world, knowing all those terms and characters in type-moon stories." +
+            " 選択肢 is only a info implying that the texts inside {} are recognized in the top part of the screen, " +
+            " so please ignore the 選択肢 and the curly braces in the output." +
+            " Avoid adding any explanations or annotations to the translated text." +
+            " Below is the text to be translated"
+
+    // TODO: this is definitely not safe, right?
+    val autoTranslateApiKey = maker.string("auto_translate_api_key", "YOUR_GEMINI_API_KEY")
+    val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", defaultTranslatePromptPrefix) // Default to English
     val autoTranslateOcrRegionX = maker.int("auto_translate_ocr_region_x", 100) // Default X
     val autoTranslateOcrRegionY = maker.int("auto_translate_ocr_region_y", 50)  // Default Y
     val autoTranslateOcrRegionWidth = maker.int("auto_translate_ocr_region_width", 2360) // Default Width

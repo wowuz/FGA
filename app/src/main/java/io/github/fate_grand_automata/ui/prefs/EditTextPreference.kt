@@ -29,6 +29,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.unit.sp
 import io.github.fate_grand_automata.R
@@ -121,6 +122,7 @@ fun Pref<String>.EditTextPreference(
     singleLine: Boolean = false,
     icon: VectorIcon? = null,
     enabled: Boolean = true,
+    isPassword: Boolean = false,
     summary: (String) -> String = { it },
     validate: (String) -> Boolean = { true }
 ) {
@@ -128,7 +130,8 @@ fun Pref<String>.EditTextPreference(
     var editing by remember { mutableStateOf(false) }
 
     val keyboardOptions = KeyboardOptions(
-        imeAction = if (singleLine) ImeAction.Done else ImeAction.Default
+        imeAction = if (singleLine) ImeAction.Done else ImeAction.Default,
+        keyboardType = if (isPassword) KeyboardType.Password else KeyboardType.Unspecified
     )
 
     if (editing) {

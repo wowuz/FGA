@@ -36,8 +36,6 @@ class ScreenshotServiceHolder @Inject constructor(
 ) : AutoCloseable {
     var screenshotService: ScreenshotService? = null
         private set
-    var hqScreenshotService: ScreenshotService? = null
-        private set
 
     fun prepareScreenshotService() {
         val landscapeMetrics = display.metrics.makeLandscape()
@@ -93,52 +91,8 @@ class ScreenshotServiceHolder @Inject constructor(
         }
     }
 
-
-    fun prepareHqScreenshotService() {
-        val landscapeMetrics = display.metrics.makeLandscape()
-        val size = Size(landscapeMetrics.widthPixels, landscapeMetrics.heightPixels)
-
-        hqScreenshotService = try {
-            if (prefs.wantsMediaProjectionToken) {
-                // Cloning the Intent allows reuse.
-                // Otherwise, the Intent gets consumed and MediaProjection cannot be started multiple times.
-                val token = ScriptRunnerService.mediaProjectionToken?.clone() as Intent
-
-                val mediaProjection =
-                    mediaProjectionManager.getMediaProjection(Activity.RESULT_OK, token)
-
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                    // not allowed to reuse tokens on Android 14
-                    ScriptRunnerService.mediaProjectionToken = null
-                }
-
-                MediaProjectionScreenshotService(
-                    mediaProjection,
-                    size,
-                    landscapeMetrics.densityDpi,
-                    storageProvider,
-                    colorManager
-                )
-            } else {
-                RootScreenshotService(
-                    SuperUser(),
-                    colorManager
-                )
-            }
-        } catch (e: Exception) {
-            Timber.e(e, "Error preparing screenshot service")
-            null
-        }
-    }
-
     override fun close() {
         screenshotService?.close()
         screenshotService = null
-    }
-
-
-    override fun closeHq() {
-        hqScreenshotService?.close()
-        hqScreenshotService = null
     }
 }

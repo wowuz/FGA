@@ -59,6 +59,7 @@ import androidx.savedstate.setViewTreeSavedStateRegistryOwner
 import dagger.hilt.android.AndroidEntryPoint
 import io.github.fate_grand_automata.prefs.core.PrefsCore // Import PrefsCore
 import io.github.fate_grand_automata.ui.FGATheme
+import io.github.fate_grand_automata.util.DisplayHelper
 import io.github.fate_grand_automata.util.overlayType
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -76,6 +77,7 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
 
     @Inject lateinit var windowManager: WindowManager
     @Inject lateinit var prefsCore: PrefsCore
+    @Inject lateinit var displayHelper: DisplayHelper
 
     private lateinit var overlayView: ComposeView
     private lateinit var layoutParams: WindowManager.LayoutParams
@@ -133,12 +135,22 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
         lifecycleRegistry.handleLifecycleEvent(Lifecycle.Event.ON_RESUME)
 
         // Load initial state from preferences
-        offsetX = prefsCore.subtitleOverlayX.get()
-        offsetY = prefsCore.subtitleOverlayY.get()
+        // offsetX = prefsCore.subtitleOverlayX.get()
+        // offsetY = prefsCore.subtitleOverlayY.get()
+        // overlayWidthPx = prefsCore.subtitleOverlayWidth.get().coerceAtLeast(minWidthPx) // Load saved width
+        // overlayHeightPx = prefsCore.subtitleOverlayHeight.get().coerceAtLeast(minHeightPx) // Load saved height
         // isLocked = prefsCore.subtitleOverlayLocked.get()
-        isLocked = false // TODO: the lock button will become dead after locked, make it a decoration for now
-        overlayWidthPx = prefsCore.subtitleOverlayWidth.get().coerceAtLeast(minWidthPx) // Load saved width
-        overlayHeightPx = prefsCore.subtitleOverlayHeight.get().coerceAtLeast(minHeightPx) // Load saved height
+        isLocked = true // TODO: the lock button will become dead after locked, make it a decoration for now
+        val metrics = displayHelper.metrics
+        // Use max/min to handle landscape/portrait consistently if needed,
+        // but WindowManager uses absolute coords, so raw values are fine.
+        // Let's assume FGA context is primarily landscape for calculation.
+        val screenWidth = kotlin.math.max(metrics.widthPixels, metrics.heightPixels)
+        val screenHeight = kotlin.math.min(metrics.widthPixels, metrics.heightPixels)
+        offsetX = (screenWidth * 0.75f).roundToInt()
+        offsetY = (screenHeight * 0.5f).roundToInt()
+        overlayWidthPx = (screenWidth * 0.25f).roundToInt()
+        overlayHeightPx = (screenHeight * 0.45f).roundToInt()
 
         layoutParams = WindowManager.LayoutParams(
             overlayWidthPx, // Use loaded width
@@ -190,7 +202,7 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
         // Post to main thread to modify View property
         overlayView.post {
             overlayView.visibility = if (visible) View.VISIBLE else View.GONE
-            Timber.v("Overlay visibility set to: ${if (visible) "VISIBLE" else "GONE"}")
+            // Timber.v("Overlay visibility set to: ${if (visible) "VISIBLE" else "GONE"}")
         }
     }
 
@@ -260,7 +272,7 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
 
 
     private fun toggleLockState() {
-        isLocked = !isLocked
+        // isLocked = !isLocked
         // Also ensure overlay is visible when unlocking, in case it was hidden
         if (!isLocked) {
             setOverlayVisibility(true)

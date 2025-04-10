@@ -68,10 +68,10 @@ fun SubtitleOverlayContent(
                 if (text.isNotBlank()) {
                     Text(
                         text = text,
-                        fontSize = 11.sp,
+                        fontSize = 13.sp,
                         color = Color.White,
                         style = MaterialTheme.typography.bodyLarge,
-                        textAlign = TextAlign.Center,
+                        textAlign = TextAlign.Left,
                         modifier = Modifier
                             .weight(1f)
                             .padding(horizontal = 4.dp, vertical = 4.dp)

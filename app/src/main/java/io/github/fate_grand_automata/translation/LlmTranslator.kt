@@ -4,6 +4,7 @@ import com.google.ai.client.generativeai.GenerativeModel
 import com.google.ai.client.generativeai.type.GenerateContentResponse
 import com.google.ai.client.generativeai.type.generationConfig
 import dagger.hilt.android.scopes.ServiceScoped
+import io.github.fate_grand_automata.scripts.prefs.IPreferences
 import io.github.lib_automata.Translator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,7 +15,7 @@ import javax.inject.Inject
 
 @ServiceScoped
 class LlmTranslator @Inject constructor(
-    // You might inject the GenerativeModel directly via Hilt if preferred
+    private val prefs: IPreferences
 ) : Translator {
 
     // !!! IMPORTANT: Replace with your actual API Key management !!!
@@ -22,10 +23,10 @@ class LlmTranslator @Inject constructor(
     // Use secure storage mechanisms like Android Keystore, EncryptedSharedPreferences,
     // or fetch from a secure backend. Accessing via BuildConfig is shown as one
     // possibility but is generally NOT secure for production apps.
-    private val apiKey = "YOUR_GEMINI_API_KEY" // Placeholder - Replace securely!
-
+    private var apiKey = prefs.translation.apiKey
     // Choose a suitable Gemini model. "gemini-2.0-flash" is fast and capable.
     private val generativeModel = GenerativeModel(
+        // TODO: make this configurable
         modelName = "gemini-2.0-flash",
         apiKey = apiKey,
         // Optional: Configure safety settings, temperature, etc.
@@ -42,18 +43,18 @@ class LlmTranslator @Inject constructor(
             return null
         }
         // Construct the prompt for the Gemini model
-        val prompt = "Translate the following text to $targetLanguage: \"$text\""
+        val prompt = "$targetLanguage: \"$text\""
 
         if (apiKey == "YOUR_GEMINI_API_KEY" || apiKey.isBlank()) {
             // Timber.e("Gemini API Key not set. Please replace the placeholder.")
-            Timber.w(text)
+            Timber.w("Toggled translate: "+text)
             return text // Provide prompt message for debuging
         }
 
         // Perform network request in IO dispatcher
         return withContext(Dispatchers.IO) {
             try {
-                Timber.d("Requesting Gemini translation for: '$text' to '$targetLanguage'")
+                Timber.d("Requesting Gemini translation for: '$text'")
 
                 // Call the Gemini API
                 val response: GenerateContentResponse = generativeModel.generateContent(prompt)
