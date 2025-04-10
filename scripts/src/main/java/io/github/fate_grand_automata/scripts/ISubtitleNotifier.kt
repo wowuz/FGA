@@ -22,4 +22,15 @@ interface ISubtitleNotifier {
      * @param text The text to display.
      */
     fun update(text: String)
+
+    /**
+     * Temporarily hides the overlay view (e.g., for taking a screenshot).
+     * The overlay service itself remains running.
+     */
+    fun hide()
+
+    /**
+     * Makes the overlay view visible again after being hidden temporarily.
+     */
+    fun show()
 }

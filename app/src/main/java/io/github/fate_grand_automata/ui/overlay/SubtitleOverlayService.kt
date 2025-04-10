@@ -7,6 +7,7 @@ import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
 import android.view.Gravity
+import android.view.View
 import android.view.WindowManager
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
@@ -97,9 +98,13 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
     private val minHeightPx = 80 // Minimum height
     // --- End State Variables ---
 
+    private var isOverlayVisible by mutableStateOf(true) // Track visibility state
+
     companion object {
         const val ACTION_UPDATE_SUBTITLE = "UPDATE_SUBTITLE"
         const val EXTRA_SUBTITLE_TEXT = "EXTRA_SUBTITLE_TEXT"
+        const val ACTION_HIDE_OVERLAY = "HIDE_OVERLAY"
+        const val ACTION_SHOW_OVERLAY = "SHOW_OVERLAY"
 
         fun start(context: Context) {
             val intent = Intent(context, SubtitleOverlayService::class.java)
@@ -166,6 +171,8 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
                 }
             }
         }
+        // Set initial visibility
+        var visibility = if (isOverlayVisible) View.VISIBLE else View.GONE
 
         try {
             windowManager.addView(overlayView, layoutParams)
@@ -175,12 +182,36 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
         }
     }
 
+    // --- Function to Set Visibility ---
+    private fun setOverlayVisibility(visible: Boolean) {
+        if (!::overlayView.isInitialized) return // Guard against early calls
+
+        isOverlayVisible = visible
+        // Post to main thread to modify View property
+        overlayView.post {
+            overlayView.visibility = if (visible) View.VISIBLE else View.GONE
+            Timber.v("Overlay visibility set to: ${if (visible) "VISIBLE" else "GONE"}")
+        }
+    }
+
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        if (intent?.action == ACTION_UPDATE_SUBTITLE) {
-            val newText = intent.getStringExtra(EXTRA_SUBTITLE_TEXT) ?: ""
-            if (newText != subtitleText) {
-                subtitleText = newText
-                Timber.d("Subtitle updated: $subtitleText")
+        when (intent?.action) {
+            ACTION_UPDATE_SUBTITLE -> {
+                val newText = intent.getStringExtra(EXTRA_SUBTITLE_TEXT) ?: ""
+                if (newText != subtitleText) {
+                    subtitleText = newText
+                    // Ensure view is visible when text updates, unless explicitly hidden
+                    if (isOverlayVisible) {
+                        setOverlayVisibility(true)
+                    }
+                    Timber.d("Subtitle updated: $subtitleText")
+                }
+            }
+            ACTION_HIDE_OVERLAY -> {
+                setOverlayVisibility(false)
+            }
+            ACTION_SHOW_OVERLAY -> {
+                setOverlayVisibility(true)
             }
         }
         return START_STICKY
@@ -230,6 +261,10 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
 
     private fun toggleLockState() {
         isLocked = !isLocked
+        // Also ensure overlay is visible when unlocking, in case it was hidden
+        if (!isLocked) {
+            setOverlayVisibility(true)
+        }
         updateLayoutParams()
     }
 

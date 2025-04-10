@@ -46,8 +46,8 @@ class LlmTranslator @Inject constructor(
 
         if (apiKey == "YOUR_GEMINI_API_KEY" || apiKey.isBlank()) {
             // Timber.e("Gemini API Key not set. Please replace the placeholder.")
-            Timber.w(prompt)
-            return prompt // Provide prompt message for debuging
+            Timber.w(text)
+            return text // Provide prompt message for debuging
         }
 
         // Perform network request in IO dispatcher

@@ -18,6 +18,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -77,47 +78,101 @@ class AutoTranslate @Inject constructor(
     }
 
     private fun checkAndTranslateOcrRegion() {
-        // --- Using screenshotService directly ---
-        // WARNING: This gets the RAW screenshot. The transformer might expect
-        // coordinates relative to the scaled/cropped image usually provided
-        // by ScreenshotManager. This might lead to incorrect cropping.
-        // val currentRawScreenshot = screenshotService.takeScreenshot()
+        subtitleNotifier.hide()
+        kotlinx.coroutines.runBlocking { delay(3) }
+        val fullScreenshot = try {
+            screenshotService.takeScreenshot()
+        } finally {
+            kotlinx.coroutines.runBlocking { delay(3) }
+            subtitleNotifier.show()
+        }
+        val dialogBox = fullScreenshot.crop(
+            Region((0.12 * fullScreenshot.width).toInt(),  // x
+                   (0.76 * fullScreenshot.height).toInt(), // y
+                   (0.6 * fullScreenshot.width).toInt(),  // width
+                   (0.24 * fullScreenshot.height).toInt()) // height
+        )// TODO: move these to Image.kt
+        dialogBox.tag = "dialogBox"
+        val dialogCharacterName = fullScreenshot.crop(
+            Region((0.10 * fullScreenshot.width).toInt(),  // x
+                   (0.68 * fullScreenshot.height).toInt(), // y
+                   (0.60 * fullScreenshot.width).toInt(),  // width
+                   (0.09 * fullScreenshot.height).toInt()) // height
+        )// TODO: move these to Image.kt
+        dialogCharacterName.tag = "dialogCharacterName"
 
-        // Transform the script region to image coordinates (intended for the scaled image)
-        // val imageRegion = transformer.toImage(ocrRegion)
+        // Could there be no dialog, only options?
+        // If so, might need to adjust the option ocr region
+        // for now just leave it like this
+        val dialogOptions = fullScreenshot.crop(
+            Region((0.1 * fullScreenshot.width).toInt(),  // x
+                0, // y
+                (0.7 * fullScreenshot.width).toInt(),  // width
+                (0.6 * fullScreenshot.height).toInt()) // height
+        )// TODO: move these to Image.kt
+        dialogOptions.tag = "dialogOptions"
 
-        // Crop the RAW screenshot using coordinates meant for the scaled image
-        // val regionOfInterestPattern = currentRawScreenshot.crop(imageRegion)
+        var dialogBoxStr = ""
+        var dialogCharacterNameStr = ""
+        var dialogOptionsStr = ""
 
-        val regionOfInterestPattern = screenshotService.takeScreenshot()
-        regionOfInterestPattern.tag = "OCR_Translate_Raw_Service"
-        // --- End direct screenshotService usage ---
+        dialogBox.use { pattern ->
+            val ocrResult = ocrService.detectText(pattern).trim()
+            if (ocrResult.isNotBlank()) {
+                dialogBoxStr = ocrResult
+            }
+        }
 
-        regionOfInterestPattern.use { pattern -> // Ensure the pattern is closed
-            val text = ocrService.detectText(pattern).trim()
+        dialogCharacterName.use { pattern ->
+            val ocrResult = ocrService.detectText(pattern).trim()
+            if (ocrResult.isNotBlank()) {
+                dialogCharacterNameStr = ocrResult
+            }
+        }
 
-            if (text.isNotBlank() && text != previousOcrText) {
-                previousOcrText = text
-                translationJob?.cancel()
-                translationJob = scriptScope.launch {
-                    try {
-                        val translatedText = translator.translate(text, targetLanguage)
-                        if (translatedText != null && isActive) {
-                            subtitleNotifier.update(translatedText)
-                        } else if (isActive) {
-                            subtitleNotifier.update("[Translation Failed]")
-                        }
-                    } catch (e: Exception) {
-                        if (isActive) {
-                            subtitleNotifier.update("[Error]")
-                        }
+        dialogOptions.use { pattern ->
+            val ocrResult = ocrService.detectText(pattern).trim()
+            if (ocrResult.isNotBlank()) {
+                dialogOptionsStr = ocrResult
+            }
+        }
+
+        val text = buildString {
+            if (dialogOptionsStr.isNotBlank()) {
+                appendLine("選択肢：")
+                appendLine(dialogOptionsStr)
+            }
+            if (dialogCharacterNameStr.isNotBlank()) {
+                appendLine(dialogCharacterNameStr + "：")
+            }
+            if (dialogBoxStr.isNotBlank()) {
+                appendLine(dialogBoxStr)
+            }
+        }.trim()
+
+        // Only check dialogBoxStr for now, since it should be the most stable ocr result
+        // because of the dialog box background
+        if (dialogBoxStr.isNotBlank() && dialogBoxStr != previousOcrText) {
+            previousOcrText = dialogBoxStr
+            translationJob?.cancel()
+            translationJob = scriptScope.launch {
+                try {
+                    val translatedText = translator.translate(text, targetLanguage)
+                    if (translatedText != null && isActive) {
+                        subtitleNotifier.update(translatedText)
+                    } else if (isActive) {
+                        subtitleNotifier.update("[Translation Failed]")
+                    }
+                } catch (e: Exception) {
+                    if (isActive) {
+                        subtitleNotifier.update("[Error]")
                     }
                 }
-            } else if (text.isBlank() && previousOcrText.isNotBlank()) {
-                previousOcrText = ""
-                translationJob?.cancel()
-                subtitleNotifier.update("")
             }
+        } else if (dialogBoxStr.isBlank() && dialogOptionsStr.isBlank() && previousOcrText.isNotBlank()) {
+            previousOcrText = ""
+            translationJob?.cancel()
+            subtitleNotifier.update("")
         }
     }
 }

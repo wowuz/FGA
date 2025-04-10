@@ -1,6 +1,7 @@
 package io.github.fate_grand_automata.util // Or another appropriate package in the 'app' module
 
 import android.content.Context
+import android.content.Intent
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.android.scopes.ServiceScoped
 import io.github.fate_grand_automata.scripts.ISubtitleNotifier
@@ -29,5 +30,21 @@ class SubtitleNotifierImpl @Inject constructor(
     override fun update(text: String) {
         // Use the static method to update the subtitle text
         SubtitleOverlayService.updateSubtitle(context, text)
+    }
+
+    override fun hide() {
+        // Send an intent with a specific action to hide the view
+        val intent = Intent(context, SubtitleOverlayService::class.java).apply {
+            action = SubtitleOverlayService.ACTION_HIDE_OVERLAY // Add this action constant
+        }
+        context.startService(intent)
+    }
+
+    override fun show() {
+        // Send an intent with a specific action to show the view
+        val intent = Intent(context, SubtitleOverlayService::class.java).apply {
+            action = SubtitleOverlayService.ACTION_SHOW_OVERLAY // Add this action constant
+        }
+        context.startService(intent)
     }
 }
