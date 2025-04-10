@@ -1,5 +1,29 @@
 # Fate/Grand Automata
 
+Forked project to add a simple translation based on Gemini-2.0-flash.
+By giving proper prompt, the quality of the translation is almost the official translation quality.
+(Only based on my experience on CN and TW server and my learned-from-anime japanese.)
+
+Features:
+- Uses ML ocr provided by google
+- Uses Gemini-2.0-flash, and configurable api-key and prompt
+- Display an overlay to show the translation
+Known problem:
+- The ML ocr japanese accuracy is not good enough.
+- Be careful, the api-key is saved as plain text, not safe, too lazy to make it secure.
+- Also not my fault if you find your api token drains in light speed, I myself uses only free account.
+To-be improved:
+- Didn't find a way to get screenshot without catching the subtitles, and if the subtitles will jam the ocr text recognizing,
+so the position and size of the subtitle window is fixed to avoid the ocr region.
+- The ocr region are defined in a very untidy way, should defined it along side other locations. But I'm to lazy to do the math.
+Unknown:
+- Almost no testing, anyway I like it and am using it
+Will be good if possible:
+- Since the ML ocr japanese accuracy is not good enough, it's also an option to send the screen shot directly to LLM api.
+I'm too poor to buy some token to test this.
+
+Any comment or contribution is welcome, if you are patient enough to read the shits I wrote. (They are actually mostly written by Gemini though)
+
 [![CI](https://github.com/Fate-Grand-Automata/FGA/workflows/CI/badge.svg?branch=master&event=push)](https://github.com/Fate-Grand-Automata/FGA/actions)
 
 [![Discord Banner 2](https://discordapp.com/api/guilds/1117873862500163684/widget.png?style=banner2)](https://discord.gg/H99eUMYuH7)
