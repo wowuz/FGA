@@ -133,6 +133,12 @@ class PrefsCore @Inject constructor(
     val autoTranslateOcrRegionWidth = maker.int("auto_translate_ocr_region_width", 2360) // Default Width
     val autoTranslateOcrRegionHeight = maker.int("auto_translate_ocr_region_height", 200) // Default Height
 
+    val subtitleOverlayX = maker.int("subtitle_overlay_x", 0) // Default X (center gravity handles initial horizontal)
+    val subtitleOverlayY = maker.int("subtitle_overlay_y", 150) // Default Y (offset from bottom)
+    val subtitleOverlayLocked = maker.bool("subtitle_overlay_locked", false) // Default unlocked
+    val subtitleOverlayWidth = maker.int("subtitle_overlay_width", 500) // Default width in pixels
+    val subtitleOverlayHeight = maker.int("subtitle_overlay_height", 150) // Default height in pixels
+
     private val battleConfigMap = mutableMapOf<String, BattleConfigCore>()
 
     fun forBattleConfig(id: String): BattleConfigCore =
