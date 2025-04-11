@@ -12,12 +12,14 @@ Features:
 Known problem:
 - The ML ocr japanese accuracy is not good enough.
 - Be careful, the api-key is saved as plain text, not safe, too lazy to make it secure.
+- And uses Google AI SDK, which google also claimed no security against api-key leaking.
 - Also not my fault if you find your api token drains in light speed, I myself uses only free account.
 
 To-be improved:
-- Didn't find a way to get screenshot without catching the subtitles, and if the subtitles will jam the ocr text recognizing,
+- Cannot auto stop after story ends, and popup scary warnings after manual stop
+- Didn't find a way to get screenshot without catching the subtitles, and the subtitles will ruin the ocr text recognizing,
 so the position and size of the subtitle window is fixed to avoid the ocr region.
-- The ocr region are defined in a very untidy way, should defined it along side other locations. But I'm to lazy to do the math.
+- The ocr region are defined in a very untidy way, should defined it along side other locations. But I'm too lazy to do the math.
 
 Unknown:
 - Almost no testing, anyway I like it and am using it

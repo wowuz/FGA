@@ -9,4 +9,5 @@ interface Translator {
      * @return The translated text, or null if translation failed.
      */
     suspend fun translate(text: String, targetLanguage: String): String?
+    suspend fun translateImage(pattern: Pattern, targetLanguage: String): String?
 }
