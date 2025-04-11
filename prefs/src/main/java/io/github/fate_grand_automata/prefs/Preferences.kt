@@ -214,6 +214,7 @@ class PreferencesImpl @Inject constructor(
     override val translation: ITranslationPreferences = object : ITranslationPreferences {
         override val apiKey get() = prefs.autoTranslateApiKey.get()
         override val targetLanguage get() = prefs.autoTranslateTargetLanguage.get()
+        override val targetImageLanguage get() = prefs.autoImageTranslateTargetLanguage.get()
         override val ocrRegionX get() = prefs.autoTranslateOcrRegionX.get()
         override val ocrRegionY get() = prefs.autoTranslateOcrRegionY.get()
         override val ocrRegionWidth get() = prefs.autoTranslateOcrRegionWidth.get()

@@ -162,6 +162,21 @@ fun LazyListScope.advancedGroup(
         )
     }
 
+    item {
+        // Consider making this a ListPreference with common language codes
+        prefs.autoImageTranslateTargetLanguage.EditTextPreference(
+            title = "Image translation prompt (for testing)", // TODO: Localize
+            icon = icon(Icons.Default.Translate),)
+    }
+
+    item {
+        Preference(
+            title = "Reset image translation prompt",
+            icon = icon(Icons.Default.Translate),
+            onClick = {prefs.autoImageTranslateTargetLanguage.resetToDefault()}
+        )
+    }
+
     // Not Used preferences
     // item {
     //     Preference(

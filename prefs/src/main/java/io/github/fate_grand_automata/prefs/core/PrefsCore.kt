@@ -137,9 +137,18 @@ class PrefsCore @Inject constructor(
             " Avoid adding any explanations or annotations to the translated text." +
             " Below is the text to be translated"
 
+
+    val defaultImageTranslatePromptPrefix = "No. You are a highly skilled translation engine." +
+            " Your function is to translate the texts in the attached screenshot from Fate Grand Order"+
+            " accurately into Simplified Chinese," +
+            " ensuring that the original tone and cultural nuances are preserved." +
+            " You are expert in the Type-moon world, knowing all those terms and characters in type-moon stories." +
+            " Avoid adding any explanations or annotations to the translated text."
+
     // TODO: this is definitely not safe, right?
     val autoTranslateApiKey = maker.string("auto_translate_api_key", "YOUR_GEMINI_API_KEY")
-    val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", defaultTranslatePromptPrefix) // Default to English
+    val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", defaultTranslatePromptPrefix)
+    val autoImageTranslateTargetLanguage = maker.string("auto_image_translate_target_lang", defaultImageTranslatePromptPrefix)
     val autoTranslateOcrRegionX = maker.int("auto_translate_ocr_region_x", 100) // Default X
     val autoTranslateOcrRegionY = maker.int("auto_translate_ocr_region_y", 50)  // Default Y
     val autoTranslateOcrRegionWidth = maker.int("auto_translate_ocr_region_width", 2360) // Default Width
