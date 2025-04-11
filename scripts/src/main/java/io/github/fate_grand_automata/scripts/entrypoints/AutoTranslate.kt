@@ -81,10 +81,10 @@ class AutoTranslate @Inject constructor(
         (0.58 * previousPattern.width).toInt(),  // width
         (0.66 * previousPattern.height).toInt()) // height
     private val noSubtitleRegion = Region(
-        (0 * previousPattern.width).toInt(),  // x
-        0, // y
-        (0.7 * previousPattern.width).toInt(),  // width
-        previousPattern.height) // height
+        (0.12 * previousPattern.width).toInt(),  // x
+        (0.10 * previousPattern.height).toInt(), // y
+        (0.58 * previousPattern.width).toInt(),  // width
+        (0.90 * previousPattern.height).toInt()) // height
 
     private val scriptScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
 

@@ -29,10 +29,25 @@ class LlmTranslator @Inject constructor(
     // possibility but is generally NOT secure for production apps.
     private var apiKey = prefs.translation.apiKey
     // Choose a suitable Gemini model. "gemini-2.0-flash" is fast and capable.
+    private val systemInstruction = content { text(prefs.translation.targetLanguage) }
+    private val systemInstructionImage = content { text(prefs.translation.targetImageLanguage) }
     private val generativeModel = GenerativeModel(
         // TODO: make this configurable
         modelName = "gemini-2.0-flash",
         apiKey = apiKey,
+        systemInstruction = systemInstruction,
+            // Optional: Configure safety settings, temperature, etc.
+        generationConfig = generationConfig {
+            // Adjust temperature for creativity vs. fidelity (0.0 = deterministic)
+            temperature = 0.2f
+        }
+        // safetySettings = listOf(...) // Add safety settings if needed
+    )
+    private val generativeImageModel = GenerativeModel(
+        // TODO: make this configurable
+        modelName = "gemini-2.0-flash",
+        apiKey = apiKey,
+        systemInstruction = systemInstructionImage,
         // Optional: Configure safety settings, temperature, etc.
         generationConfig = generationConfig {
             // Adjust temperature for creativity vs. fidelity (0.0 = deterministic)
@@ -40,6 +55,8 @@ class LlmTranslator @Inject constructor(
         }
         // safetySettings = listOf(...) // Add safety settings if needed
     )
+    val chat = generativeModel.startChat()
+    val chatImage = generativeImageModel.startChat()
 
     override suspend fun translate(text: String, targetLanguage: String): String? {
         if (text.isBlank()) {
@@ -61,7 +78,8 @@ class LlmTranslator @Inject constructor(
                 Timber.d("Requesting Gemini translation for: '$text'")
 
                 // Call the Gemini API
-                val response: GenerateContentResponse = generativeModel.generateContent(prompt)
+                // val response: GenerateContentResponse = generativeModel.generateContent(text)
+                val response: GenerateContentResponse = chat.sendMessage(text)
 
                 // Extract the translated text from the response
                 val translatedText = response.text
@@ -113,10 +131,11 @@ class LlmTranslator @Inject constructor(
 
                 val inputContent = content {
                     image(bitmap)
-                    text(targetLanguage)
+                    // text(targetLanguage)
                 }
                 // Call the Gemini API
-                val response: GenerateContentResponse = generativeModel.generateContent(inputContent)
+                // val response: GenerateContentResponse = generativeModel.generateContent(inputContent)
+                val response: GenerateContentResponse = chatImage.sendMessage(inputContent)
 
                 // Extract the translated text from the response
                 val translatedText = response.text
