@@ -214,11 +214,14 @@ class PreferencesImpl @Inject constructor(
     override val translation: ITranslationPreferences = object : ITranslationPreferences {
         override val apiKey get() = prefs.autoTranslateApiKey.get()
         override val targetLanguage get() = prefs.autoTranslateTargetLanguage.get()
-        override val targetImageLanguage get() = prefs.autoImageTranslateTargetLanguage.get()
+        override val translateInstruction get() = prefs.autoTranslateInstruction.get()
+        override val translateImageInstruction get() = prefs.autoImageTranslateInstruction.get()
         override val ocrRegionX get() = prefs.autoTranslateOcrRegionX.get()
         override val ocrRegionY get() = prefs.autoTranslateOcrRegionY.get()
         override val ocrRegionWidth get() = prefs.autoTranslateOcrRegionWidth.get()
         override val ocrRegionHeight get() = prefs.autoTranslateOcrRegionHeight.get()
+
+        override val imageInputSwitch get() = prefs.autoTranslateImageInputSwitch.get()
         override val translateModel get() = prefs.autoTranslateModel.get()
         override val chatMode get() = prefs.autoTranslateChatMode.get()
         // getOcrRegion() is implemented in the interface itself

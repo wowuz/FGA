@@ -8,12 +8,14 @@ import io.github.lib_automata.Region
 interface ITranslationPreferences {
     val apiKey: String
     val targetLanguage: String
-    val targetImageLanguage: String
+    val translateImageInstruction: String
+    val translateInstruction: String
     val ocrRegionX: Int
     val ocrRegionY: Int
     val ocrRegionWidth: Int
     val ocrRegionHeight: Int
 
+    val imageInputSwitch: Boolean
     val translateModel: String
     val chatMode: Boolean
 

@@ -126,9 +126,8 @@ class PrefsCore @Inject constructor(
         }
     )
 
-    val defaultTranslatePromptPrefix = "You are a highly skilled translation engine." +
-            " Your function is to translate OCR texts from Fate Grand Order"+
-            " accurately into Simplified Chinese," +
+    val defaultTranslateInstruction = "You are a highly skilled translation engine." +
+            " Your function is to translate OCR texts from Fate Grand Order accurately into target language," +
             " ensuring that the original tone and cultural nuances are preserved." +
             " You will also try to improve the translation quality according to the previous translation." +
             " Please also try to correct the possibly in-accurate OCR recognizing." +
@@ -137,10 +136,8 @@ class PrefsCore @Inject constructor(
             " so please ignore the 選択肢 and the curly braces in the output." +
             " Avoid adding any explanations or annotations to the translated text."
 
-
-    val defaultImageTranslatePromptPrefix = "No. You are a highly skilled translation engine." +
-            " Your function is to translate the texts in the attached screenshot from Fate Grand Order"+
-            " accurately into Simplified Chinese," +
+    val defaultImageTranslateInstruction = "You are a highly skilled translation engine." +
+            " Your function is to translate the texts in the attached screenshot from Fate Grand Order accurately into target language," +
             " ensuring that the original tone and cultural nuances are preserved." +
             " You will also try to improve the translation quality according to the previous translation." +
             " You are expert in the Type-moon world, knowing all those terms and characters in type-moon stories." +
@@ -148,13 +145,15 @@ class PrefsCore @Inject constructor(
 
     // TODO: this is definitely not safe, right?
     val autoTranslateApiKey = maker.string("auto_translate_api_key", "YOUR_GEMINI_API_KEY")
-    val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", defaultTranslatePromptPrefix)
-    val autoImageTranslateTargetLanguage = maker.string("auto_image_translate_target_lang", defaultImageTranslatePromptPrefix)
+    val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", "Traditional Chinese")
+    val autoTranslateInstruction = maker.string("auto_translate_target_lang", defaultTranslateInstruction)
+    val autoImageTranslateInstruction = maker.string("auto_image_translate_target_lang", defaultImageTranslateInstruction)
     val autoTranslateOcrRegionX = maker.int("auto_translate_ocr_region_x", 100) // Default X
     val autoTranslateOcrRegionY = maker.int("auto_translate_ocr_region_y", 50)  // Default Y
     val autoTranslateOcrRegionWidth = maker.int("auto_translate_ocr_region_width", 2360) // Default Width
     val autoTranslateOcrRegionHeight = maker.int("auto_translate_ocr_region_height", 200) // Default Height
 
+    val autoTranslateImageInputSwitch = maker.bool("auto_translate_image_input_switch", false)
     val autoTranslateModel = maker.string("auto_translate_model", "gemini-2.0-flash")
     val autoTranslateChatMode = maker.bool("auto_translate_chat_mode", false)
 

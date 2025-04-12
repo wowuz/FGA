@@ -29,8 +29,8 @@ class LlmTranslator @Inject constructor(
     // possibility but is generally NOT secure for production apps.
     private var apiKey = prefs.translation.apiKey
     // Choose a suitable Gemini model. "gemini-2.0-flash" is fast and capable.
-    private val systemInstruction = content { text(prefs.translation.targetLanguage) }
-    private val systemInstructionImage = content { text(prefs.translation.targetImageLanguage) }
+    private val systemInstruction = content { text(prefs.translation.translateInstruction) }
+    private val systemInstructionImage = content { text(prefs.translation.translateImageInstruction) }
     private val generativeModel = GenerativeModel(
         modelName = prefs.translation.translateModel,
         apiKey = apiKey,
@@ -63,7 +63,7 @@ class LlmTranslator @Inject constructor(
             return null
         }
         // Construct the prompt for the Gemini model
-        val prompt = "$targetLanguage: \"$text\""
+        val prompt = "Target language: $targetLanguage, text to be translated: \"$text\""
 
         if (apiKey == "YOUR_GEMINI_API_KEY" || apiKey.isBlank()) {
             // Timber.e("Gemini API Key not set. Please replace the placeholder.")
@@ -78,9 +78,9 @@ class LlmTranslator @Inject constructor(
 
                 // Call the Gemini API
                 val response: GenerateContentResponse = if (prefs.translation.chatMode) {
-                    chat.sendMessage(text)
+                    chat.sendMessage(prompt)
                 } else {
-                    generativeModel.generateContent(text)
+                    generativeModel.generateContent(prompt)
                 }
 
                 // Extract the translated text from the response
@@ -109,7 +109,7 @@ class LlmTranslator @Inject constructor(
 
     override suspend fun translateImage(pattern: Pattern, targetLanguage: String): String? {
         // Construct the prompt for the Gemini model
-        // val prompt = "$targetLanguage: \"$text\""
+        val prompt = "Target language: $targetLanguage"
 
         if (apiKey == "YOUR_GEMINI_API_KEY" || apiKey.isBlank()) {
             // Timber.e("Gemini API Key not set. Please replace the placeholder.")
@@ -133,7 +133,7 @@ class LlmTranslator @Inject constructor(
 
                 val inputContent = content {
                     image(bitmap)
-                    // text(targetLanguage)
+                    text(prompt)
                 }
                 // Call the Gemini API
                 val response: GenerateContentResponse = if (prefs.translation.chatMode) {

@@ -16,6 +16,7 @@ import androidx.compose.material.icons.filled.ChatBubble
 import androidx.compose.material.icons.filled.EnhancedEncryption
 import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material.icons.filled.Translate
@@ -156,17 +157,24 @@ fun LazyListScope.advancedGroup(
         )
     }
 
+
     item {
         // Consider making this a ListPreference with common language codes
-        prefs.autoTranslateTargetLanguage.EditTextPreference(
-            title = "Translation prompt", // TODO: Localize
+        prefs.autoTranslateInstruction.EditTextPreference(
+            title = "Translation instruction", // TODO: Localize
+            icon = icon(Icons.Default.Translate),)
+    }
+    item {
+        // Consider making this a ListPreference with common language codes
+        prefs.autoImageTranslateInstruction.EditTextPreference(
+            title = "Image translation instruction", // TODO: Localize
             icon = icon(Icons.Default.Translate),)
     }
 
     item {
         // Consider making this a ListPreference with common language codes
-        prefs.autoImageTranslateTargetLanguage.EditTextPreference(
-            title = "Image translation prompt (for testing)", // TODO: Localize
+        prefs.autoTranslateTargetLanguage.EditTextPreference(
+            title = "Translation target language", // TODO: Localize
             icon = icon(Icons.Default.Translate),)
     }
 
@@ -183,6 +191,14 @@ fun LazyListScope.advancedGroup(
                 "gemini-1.5-pro" to "gemini-1.5-pro",
                 "gemini-2.5-pro-preview-03-25" to "gemini-2.5-pro-preview-03-25"
             )
+        )
+    }
+
+    item {
+        prefs.autoTranslateImageInputSwitch.SwitchPreference(
+            title = "Image input",
+            summary = "Directly using image input",
+            icon = icon(Icons.Default.Image)
         )
     }
 
@@ -247,14 +263,14 @@ fun LazyListScope.advancedGroup(
         Preference(
             title = "Reset translation prompt",
             icon = icon(Icons.Default.Translate),
-            onClick = {prefs.autoTranslateTargetLanguage.resetToDefault()}
+            onClick = {prefs.autoTranslateInstruction.resetToDefault()}
         )
     }
     item {
         Preference(
             title = "Reset image translation prompt",
             icon = icon(Icons.Default.Translate),
-            onClick = {prefs.autoImageTranslateTargetLanguage.resetToDefault()}
+            onClick = {prefs.autoImageTranslateInstruction.resetToDefault()}
         )
     }
 }

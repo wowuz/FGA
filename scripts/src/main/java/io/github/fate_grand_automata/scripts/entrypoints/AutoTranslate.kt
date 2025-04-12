@@ -46,8 +46,6 @@ class AutoTranslate @Inject constructor(
 
     // --- Read Configuration from IPreferences ---
     // private val ocrRegion = prefs.translation.getOcrRegion()
-    private val targetLanguage = prefs.translation.targetLanguage
-    private val targetImageLanguage = prefs.translation.targetImageLanguage
     private val checkInterval = 500.milliseconds
     // --- End Configuration ---
 
@@ -199,10 +197,10 @@ class AutoTranslate @Inject constructor(
                 translationJob = scriptScope.launch {
                     try {
                         var translatedText = ""
-                        if (targetImageLanguage.startsWith("No")) {
-                            translatedText = translator.translate(text, targetLanguage)?: ""
+                        if (prefs.translation.imageInputSwitch) {
+                            translatedText = translator.translate(text, prefs.translation.targetLanguage)?: ""
                         } else {
-                            translatedText = translator.translateImage(fullScreenshot.crop(noSubtitleRegion), targetImageLanguage)?: ""
+                            translatedText = translator.translateImage(fullScreenshot.crop(noSubtitleRegion), prefs.translation.targetLanguage)?: ""
                         }
                         if (translatedText != null && isActive) {
                             subtitleNotifier.update(translatedText)
