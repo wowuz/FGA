@@ -155,6 +155,9 @@ class PrefsCore @Inject constructor(
     val autoTranslateOcrRegionWidth = maker.int("auto_translate_ocr_region_width", 2360) // Default Width
     val autoTranslateOcrRegionHeight = maker.int("auto_translate_ocr_region_height", 200) // Default Height
 
+    val autoTranslateModel = maker.string("auto_translate_model", "gemini-2.0-flash")
+    val autoTranslateChatMode = maker.bool("auto_translate_chat_mode", false)
+
     val subtitleOverlayX = maker.int("subtitle_overlay_x", 0) // Default X (center gravity handles initial horizontal)
     val subtitleOverlayY = maker.int("subtitle_overlay_y", 150) // Default Y (offset from bottom)
     val subtitleOverlayLocked = maker.bool("subtitle_overlay_locked", false) // Default unlocked

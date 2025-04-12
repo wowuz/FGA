@@ -9,7 +9,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Assistant
+import androidx.compose.material.icons.filled.CardGiftcard
+import androidx.compose.material.icons.filled.CardMembership
+import androidx.compose.material.icons.filled.ChatBubble
+import androidx.compose.material.icons.filled.EnhancedEncryption
+import androidx.compose.material.icons.filled.FastForward
 import androidx.compose.material.icons.filled.Fullscreen
+import androidx.compose.material.icons.filled.Public
+import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,6 +40,7 @@ import io.github.fate_grand_automata.prefs.core.GameAreaMode
 import io.github.fate_grand_automata.prefs.core.Pref
 import io.github.fate_grand_automata.prefs.core.PrefsCore
 import io.github.fate_grand_automata.root.SuperUser
+import io.github.fate_grand_automata.scripts.enums.GameServer
 import io.github.fate_grand_automata.ui.Stepper
 import io.github.fate_grand_automata.ui.battle_config_item.PartySelectionDialogContent
 import io.github.fate_grand_automata.ui.dialog.FgaDialog
@@ -155,14 +164,6 @@ fun LazyListScope.advancedGroup(
     }
 
     item {
-        Preference(
-            title = "Reset translation prompt",
-            icon = icon(Icons.Default.Translate),
-            onClick = {prefs.autoTranslateTargetLanguage.resetToDefault()}
-        )
-    }
-
-    item {
         // Consider making this a ListPreference with common language codes
         prefs.autoImageTranslateTargetLanguage.EditTextPreference(
             title = "Image translation prompt (for testing)", // TODO: Localize
@@ -170,10 +171,26 @@ fun LazyListScope.advancedGroup(
     }
 
     item {
-        Preference(
-            title = "Reset image translation prompt",
-            icon = icon(Icons.Default.Translate),
-            onClick = {prefs.autoImageTranslateTargetLanguage.resetToDefault()}
+        prefs.autoTranslateModel.ListPreference(
+            title = "LLM Model",
+            summary = "Used for translation, only Gemini supported for now", // TODO: Localize
+            icon = icon(Icons.Default.Assistant),
+            entries =  mapOf(
+                prefs.autoTranslateModel.defaultValue to prefs.autoTranslateModel.defaultValue,
+                "gemini-2.0-flash-lite" to "gemini-2.0-flash-lite",
+                "gemini-1.5-flash" to "gemini-1.5-flash",
+                "gemini-1.5-flash-8b" to "gemini-1.5-flash-8b",
+                "gemini-1.5-pro" to "gemini-1.5-pro",
+                "gemini-2.5-pro-preview-03-25" to "gemini-2.5-pro-preview-03-25"
+            )
+        )
+    }
+
+    item {
+        prefs.autoTranslateChatMode.SwitchPreference(
+            title = "LLM Chat mode",
+            summary = "Potentially increases latency and accuracy of the translation", // TODO: Localize
+            icon = icon(Icons.Default.ChatBubble)
         )
     }
 
@@ -225,6 +242,21 @@ fun LazyListScope.advancedGroup(
     //         icon = icon(R.drawable.ic_screenshot)
     //     )
     // }
+
+    item {
+        Preference(
+            title = "Reset translation prompt",
+            icon = icon(Icons.Default.Translate),
+            onClick = {prefs.autoTranslateTargetLanguage.resetToDefault()}
+        )
+    }
+    item {
+        Preference(
+            title = "Reset image translation prompt",
+            icon = icon(Icons.Default.Translate),
+            onClick = {prefs.autoImageTranslateTargetLanguage.resetToDefault()}
+        )
+    }
 }
 
 // Extracted Game Area logic for clarity

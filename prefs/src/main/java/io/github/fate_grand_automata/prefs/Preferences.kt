@@ -219,6 +219,8 @@ class PreferencesImpl @Inject constructor(
         override val ocrRegionY get() = prefs.autoTranslateOcrRegionY.get()
         override val ocrRegionWidth get() = prefs.autoTranslateOcrRegionWidth.get()
         override val ocrRegionHeight get() = prefs.autoTranslateOcrRegionHeight.get()
+        override val translateModel get() = prefs.autoTranslateModel.get()
+        override val chatMode get() = prefs.autoTranslateChatMode.get()
         // getOcrRegion() is implemented in the interface itself
     }
 }

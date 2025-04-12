@@ -14,6 +14,9 @@ interface ITranslationPreferences {
     val ocrRegionWidth: Int
     val ocrRegionHeight: Int
 
+    val translateModel: String
+    val chatMode: Boolean
+
     /**
      * Convenience function to get the OCR region as a Region object.
      */

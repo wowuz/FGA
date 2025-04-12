@@ -32,8 +32,7 @@ class LlmTranslator @Inject constructor(
     private val systemInstruction = content { text(prefs.translation.targetLanguage) }
     private val systemInstructionImage = content { text(prefs.translation.targetImageLanguage) }
     private val generativeModel = GenerativeModel(
-        // TODO: make this configurable
-        modelName = "gemini-2.0-flash",
+        modelName = prefs.translation.translateModel,
         apiKey = apiKey,
         systemInstruction = systemInstruction,
             // Optional: Configure safety settings, temperature, etc.
@@ -78,8 +77,11 @@ class LlmTranslator @Inject constructor(
                 Timber.d("Requesting Gemini translation for: '$text'")
 
                 // Call the Gemini API
-                // val response: GenerateContentResponse = generativeModel.generateContent(text)
-                val response: GenerateContentResponse = chat.sendMessage(text)
+                val response: GenerateContentResponse = if (prefs.translation.chatMode) {
+                    chat.sendMessage(text)
+                } else {
+                    generativeModel.generateContent(text)
+                }
 
                 // Extract the translated text from the response
                 val translatedText = response.text
@@ -134,8 +136,11 @@ class LlmTranslator @Inject constructor(
                     // text(targetLanguage)
                 }
                 // Call the Gemini API
-                // val response: GenerateContentResponse = generativeModel.generateContent(inputContent)
-                val response: GenerateContentResponse = chatImage.sendMessage(inputContent)
+                val response: GenerateContentResponse = if (prefs.translation.chatMode) {
+                    chat.sendMessage(inputContent)
+                } else {
+                    generativeModel.generateContent(inputContent)
+                }
 
                 // Extract the translated text from the response
                 val translatedText = response.text

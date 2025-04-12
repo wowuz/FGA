@@ -81,6 +81,7 @@ fun SubtitleOverlayContent(
                 }
 
                 CompositionLocalProvider(LocalContentColor provides Color.White) {
+                    /*
                     IconButton(
                         onClick = onLockToggle,
                         modifier = Modifier.size(32.dp)
@@ -90,6 +91,7 @@ fun SubtitleOverlayContent(
                             contentDescription = if (isLocked) "Unlock Overlay" else "Lock Overlay",
                         )
                     }
+                    */
                 }
             }
         }
