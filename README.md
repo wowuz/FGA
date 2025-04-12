@@ -8,6 +8,7 @@ Features:
 - Uses ML ocr provided by google
 - Uses Gemini-2.0-flash, and configurable api-key and prompt
 - Display an overlay to show the translation
+- Since the ML ocr japanese accuracy is not good enough, it's also an option to send the screenshot directly to LLM api.
 
 Known problem:
 - The ML ocr japanese accuracy is not good enough.
@@ -23,10 +24,6 @@ so the position and size of the subtitle window is fixed to avoid the ocr region
 
 Unknown:
 - Almost no testing, anyway I like it and am using it
-
-Will be good if possible:
-- Since the ML ocr japanese accuracy is not good enough, it's also an option to send the screen shot directly to LLM api.
-I'm too poor to buy some token to test this.
 
 Any comment or contribution is welcome, if you are patient enough to read the shits I wrote. (They are actually mostly written by Gemini though)
 
