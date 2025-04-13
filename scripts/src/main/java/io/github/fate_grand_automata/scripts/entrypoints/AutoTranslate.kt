@@ -1,18 +1,17 @@
 package io.github.fate_grand_automata.scripts.entrypoints
 
+// Removed: import io.github.lib_automata.ScreenshotManager
 import io.github.fate_grand_automata.scripts.IFgoAutomataApi
 import io.github.fate_grand_automata.scripts.ISubtitleNotifier
-import io.github.fate_grand_automata.scripts.prefs.IPreferences
 import io.github.lib_automata.EntryPoint
 import io.github.lib_automata.ExitManager
 import io.github.lib_automata.OcrService
 import io.github.lib_automata.Pattern
-import io.github.lib_automata.Translator
 import io.github.lib_automata.Region
-// Removed: import io.github.lib_automata.ScreenshotManager
-import io.github.lib_automata.ScreenshotService // Import ScreenshotService
+import io.github.lib_automata.ScreenshotService
 import io.github.lib_automata.ScriptAbortException
 import io.github.lib_automata.Transformer
+import io.github.lib_automata.Translator
 import io.github.lib_automata.dagger.ScriptScope
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -22,13 +21,12 @@ import kotlinx.coroutines.cancel
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import javax.inject.Inject
-import kotlin.time.Duration.Companion.milliseconds
-import kotlin.time.Duration.Companion.seconds
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
+import java.util.Locale
+import javax.inject.Inject
 import kotlin.coroutines.cancellation.CancellationException
+import kotlin.math.min
+import kotlin.time.Duration.Companion.milliseconds
 
 
 @ScriptScope
@@ -119,6 +117,51 @@ class AutoTranslate @Inject constructor(
         throw ScriptAbortException()
     }
 
+    private fun editDistance(s1: String, s2: String): Int {
+        var s1 = s1
+        var s2 = s2
+        s1 = s1.lowercase(Locale.getDefault())
+        s2 = s2.lowercase(Locale.getDefault())
+
+        val costs = IntArray(s2.length + 1)
+        for (i in 0..s1.length) {
+            var lastValue = i
+            for (j in 0..s2.length) {
+                if (i == 0) costs[j] = j
+                else {
+                    if (j > 0) {
+                        var newValue = costs[j - 1]
+                        if (s1[i - 1] != s2[j - 1]) newValue = (min(
+                            min(newValue.toDouble(), lastValue.toDouble()),
+                            costs[j].toDouble()
+                        ) + 1).toInt()
+                        costs[j - 1] = lastValue
+                        lastValue = newValue
+                    }
+                }
+            }
+            if (i > 0) costs[s2.length] = lastValue
+        }
+        return costs[s2.length]
+    }
+
+    private fun similarity(s1: String, s2: String): Double {
+        var longer = s1
+        var shorter = s2
+        if (s1.length < s2.length) { // longer should always have greater length
+            longer = s2
+            shorter = s1
+        }
+        val longerLength = longer.length
+        if (longerLength == 0) {
+            return 1.0 /* both strings are zero length */
+        }
+        /* // If you have StringUtils, you can use it to calculate the edit distance:
+        return (longerLength - StringUtils.getLevenshteinDistance(longer, shorter)) /
+                                                             (double) longerLength; */
+        return (longerLength - editDistance(longer, shorter)) / longerLength.toDouble()
+    }
+
     private fun checkAndTranslateOcrRegion() {
         var fullScreenshot = screenshotService.takeScreenshot()
         var patternToBeCompared = fullScreenshot.crop(
@@ -193,13 +236,14 @@ class AutoTranslate @Inject constructor(
                 }
             }.trim()
 
-            if (text.isNotBlank() && text != previousOcrText) {
+            val similarity = similarity(text, previousOcrText)
+            if (text.isNotBlank() && similarity < 0.85) { // 0.85 is not tested
                 if (text.isNotBlank()) {
                     previousOcrText = text
                 }
                 if (translationJob != null && !translationJob!!.isCompleted) {
                     subtitleNotifier.update(previousTranslatedText)
-                    runBlocking { delay(400) } // prevent asking for translate too fast
+                    runBlocking { delay(300) } // prevent asking for translate too fast
                     translationJob?.cancel()
                 }
                 translationJob = scriptScope.launch {
@@ -215,8 +259,8 @@ class AutoTranslate @Inject constructor(
                             subtitleNotifier.update(previousTranslatedText)
                         } else if (translatedText == "Null Quota") {
                             subtitleNotifier.update(previousTranslatedText+
-                                    System.lineSeparator()+"Gemini Quota Exceeded, retrying in 10 seconds...")
-                            runBlocking { delay(10000) } // prevent asking for translate too fast
+                                    System.lineSeparator()+"Gemini Quota Exceeded, retrying in 3 seconds...")
+                            runBlocking { delay(3000) } // prevent asking for translate too fast
                         } else if (isActive) {
                             subtitleNotifier.update(translatedText)
                             previousTranslatedText = translatedText
@@ -242,7 +286,7 @@ class AutoTranslate @Inject constructor(
                 subtitleNotifier.update("")
             }
             // TODO: make this configurable
-            runBlocking { delay(400) }
+            runBlocking { delay(100) }
         }
     }
 }
