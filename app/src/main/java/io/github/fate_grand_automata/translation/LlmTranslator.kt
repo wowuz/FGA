@@ -16,6 +16,8 @@ import javax.inject.Inject
 import com.google.ai.client.generativeai.type.content
 import com.google.android.gms.tasks.Tasks
 import io.github.fate_grand_automata.imaging.DroidCvPattern
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 import kotlin.coroutines.cancellation.CancellationException
 
@@ -135,7 +137,7 @@ class LlmTranslator @Inject constructor(
                     }
 
                 if (bitmap == null) {
-                    null
+                    "Null"
                 }
 
                 val inputContent = content {
@@ -158,20 +160,26 @@ class LlmTranslator @Inject constructor(
                 } else {
                     // Log potential safety blocks or other reasons for null text
                     Timber.w("Gemini response text was null. Response: $response")
-                    null
+                    "Null"
                 }
 
             } catch (e: CancellationException) {
                 Timber.w(e, "Gemini translation using Image input was cancelled.")
                 // Optionally, retry the translation or return a specific error message
-                null // Or a message like "[Translation Cancelled]"
+                "Null" // Or a message like "[Translation Cancelled]"
             } catch (e: IOException) {
-                Timber.e(e, "Network error during Gemini translation request.")
-                null // Handle network errors
+                Timber.e(e, "Network error during Gemini Image input translation request.")
+                val errorMessage = e.message ?: ""
+                if (errorMessage.contains("quota", ignoreCase = true) ||
+                    errorMessage.contains("rate limit", ignoreCase = true)) {
+                    "Null Quota"
+                } else {
+                    "Null" // Handle network errors
+                }
             } catch (e: Exception) {
                 // Catch more specific exceptions from the Gemini SDK if possible
-                Timber.e(e, "Error during Gemini translation.")
-                null // Handle other potential errors (API errors, etc.)
+                Timber.e(e, "Error during Gemini Image input translation.")
+                "Null" // Handle other potential errors (API errors, etc.)
             }
         }
     }

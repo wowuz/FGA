@@ -28,6 +28,7 @@ import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.runBlocking
+import kotlin.coroutines.cancellation.CancellationException
 
 
 @ScriptScope
@@ -51,6 +52,7 @@ class AutoTranslate @Inject constructor(
 
     private var translationJob: Job? = null
     private var previousOcrText: String = ""
+    private var previousTranslatedText: String = ""
     private var previousPattern: Pattern = screenshotService.takeScreenshot()
     // TODO: move these to Image.kt
     private val findRegion = Region(
@@ -195,14 +197,11 @@ class AutoTranslate @Inject constructor(
                 if (text.isNotBlank()) {
                     previousOcrText = text
                 }
-                // Wait for previous translation job to finish
-                var waitCount = 0
-                val maxWaitCount = 200 // 20 seconds (200 * 100ms = 20000ms = 20s)
-                while (translationJob?.isActive == true && waitCount < maxWaitCount) {
-                    runBlocking { delay(100) }
-                    waitCount++
+                if (translationJob != null && !translationJob!!.isCompleted) {
+                    subtitleNotifier.update(previousTranslatedText)
+                    runBlocking { delay(2000) } // prevent asking for translate too fast
+                    translationJob?.cancel()
                 }
-                translationJob?.cancel()
                 translationJob = scriptScope.launch {
                     try {
                         var translatedText = ""
@@ -211,11 +210,21 @@ class AutoTranslate @Inject constructor(
                         } else {
                             translatedText = translator.translate(text, prefs.translation.targetLanguage)?: ""
                         }
-                        if (translatedText != null && isActive) {
-                            subtitleNotifier.update(translatedText)
+
+                        if (translatedText == "Null") {
+                            subtitleNotifier.update(previousTranslatedText)
+                        } else if (translatedText == "Null Quota") {
+                            subtitleNotifier.update(previousTranslatedText+
+                                    System.lineSeparator()+"Gemini Quota Exceeded, retrying in 10 seconds...")
+                            runBlocking { delay(10000) } // prevent asking for translate too fast
                         } else if (isActive) {
+                            subtitleNotifier.update(translatedText)
+                            previousTranslatedText = translatedText
+                        } else {
                             subtitleNotifier.update("[Translation Failed]")
                         }
+                    } catch (e: CancellationException) {
+                        subtitleNotifier.update(previousTranslatedText)
                     } catch (e: Exception) {
                         if (isActive) {
                             subtitleNotifier.update("[Error]")
