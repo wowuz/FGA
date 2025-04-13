@@ -199,7 +199,7 @@ class AutoTranslate @Inject constructor(
                 }
                 if (translationJob != null && !translationJob!!.isCompleted) {
                     subtitleNotifier.update(previousTranslatedText)
-                    runBlocking { delay(2000) } // prevent asking for translate too fast
+                    runBlocking { delay(400) } // prevent asking for translate too fast
                     translationJob?.cancel()
                 }
                 translationJob = scriptScope.launch {
