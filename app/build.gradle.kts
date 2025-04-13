@@ -136,8 +136,6 @@ dependencies {
     implementation(libs.androidx.navigation.compose)
     implementation(libs.androidx.hilt.navigation.compose)
 
-
-
     implementation(libs.accompanist.pager.indicators)
     implementation(libs.accompanist.permissions)
 
@@ -151,7 +149,7 @@ dependencies {
     implementation("com.google.mlkit:text-recognition:16.0.1")
 
     // To recognize Chinese script
-    implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
+    // implementation("com.google.mlkit:text-recognition-chinese:16.0.1")
 
     // To recognize Japanese script
     implementation("com.google.mlkit:text-recognition-japanese:16.0.1")

@@ -17,6 +17,7 @@ import com.google.ai.client.generativeai.type.content
 import com.google.android.gms.tasks.Tasks
 import io.github.fate_grand_automata.imaging.DroidCvPattern
 import java.util.concurrent.TimeUnit
+import kotlin.coroutines.cancellation.CancellationException
 
 
 @ServiceScoped
@@ -97,6 +98,10 @@ class LlmTranslator @Inject constructor(
                     null
                 }
 
+            } catch (e: CancellationException) {
+                Timber.w(e, "Gemini translation was cancelled.")
+                // Optionally, retry the translation or return a specific error message
+                null // Or a message like "[Translation Cancelled]"
             } catch (e: IOException) {
                 Timber.e(e, "Network error during Gemini translation request.")
                 null // Handle network errors
@@ -156,6 +161,10 @@ class LlmTranslator @Inject constructor(
                     null
                 }
 
+            } catch (e: CancellationException) {
+                Timber.w(e, "Gemini translation using Image input was cancelled.")
+                // Optionally, retry the translation or return a specific error message
+                null // Or a message like "[Translation Cancelled]"
             } catch (e: IOException) {
                 Timber.e(e, "Network error during Gemini translation request.")
                 null // Handle network errors

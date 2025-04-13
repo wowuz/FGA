@@ -195,6 +195,13 @@ class AutoTranslate @Inject constructor(
                 if (text.isNotBlank()) {
                     previousOcrText = text
                 }
+                // Wait for previous translation job to finish
+                var waitCount = 0
+                val maxWaitCount = 200 // 20 seconds (200 * 100ms = 20000ms = 20s)
+                while (translationJob?.isActive == true && waitCount < maxWaitCount) {
+                    runBlocking { delay(100) }
+                    waitCount++
+                }
                 translationJob?.cancel()
                 translationJob = scriptScope.launch {
                     try {
