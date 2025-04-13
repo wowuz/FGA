@@ -14,7 +14,9 @@ import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 import com.google.ai.client.generativeai.type.content
+import com.google.android.gms.tasks.Tasks
 import io.github.fate_grand_automata.imaging.DroidCvPattern
+import java.util.concurrent.TimeUnit
 
 
 @ServiceScoped

@@ -63,6 +63,7 @@ class AutoTranslate @Inject constructor(
         (0.69 * previousPattern.height).toInt(), // y
         (0.25 * previousPattern.width).toInt(),  // width
         (0.25 * previousPattern.height).toInt()) // height
+
     private val dialogBoxRegion = Region(
         (0.12 * previousPattern.width).toInt(),  // x
         (0.76 * previousPattern.height).toInt(), // y
@@ -78,10 +79,11 @@ class AutoTranslate @Inject constructor(
         0, // y
         (0.58 * previousPattern.width).toInt(),  // width
         (0.66 * previousPattern.height).toInt()) // height
+
     private val noSubtitleRegion = Region(
-        (0.12 * previousPattern.width).toInt(),  // x
+        (0.10 * previousPattern.width).toInt(),  // x
         (0.10 * previousPattern.height).toInt(), // y
-        (0.58 * previousPattern.width).toInt(),  // width
+        (0.60 * previousPattern.width).toInt(),  // width
         (0.90 * previousPattern.height).toInt()) // height
 
     private val scriptScope = CoroutineScope(Dispatchers.Default + SupervisorJob())
@@ -121,8 +123,7 @@ class AutoTranslate @Inject constructor(
             compareRegion
         )
         if (previousPattern in findRegion) {
-            subtitleNotifier.show()
-            runBlocking { delay(50) }
+            runBlocking { delay(100) }
         } else {
             // Causes flicker, any better approch?
             // subtitleNotifier.hide()
@@ -137,11 +138,12 @@ class AutoTranslate @Inject constructor(
             val dialogBox = fullScreenshot.crop(
                 dialogBoxRegion
             )
-            dialogBox.tag = "dialogBox"
+            // dialogBox.tag = "dialogBox"
+
             val dialogCharacterName = fullScreenshot.crop(
                 dialogCharacterNameRegion
             )
-            dialogCharacterName.tag = "dialogCharacterName"
+            // dialogCharacterName.tag = "dialogCharacterName"
 
             // Could there be no dialog, only options?
             // If so, might need to adjust the option ocr region
@@ -149,7 +151,7 @@ class AutoTranslate @Inject constructor(
             val dialogOptions = fullScreenshot.crop(
                 dialogOptionsRegion
             )
-            dialogOptions.tag = "dialogOptions"
+            // dialogOptions.tag = "dialogOptions"
 
             var dialogBoxStr = ""
             var dialogCharacterNameStr = ""
@@ -189,18 +191,18 @@ class AutoTranslate @Inject constructor(
                 }
             }.trim()
 
-            // Only check dialogBoxStr for now, since it should be the most stable ocr result
-            // because of the dialog box background
-            if (text.isNotBlank() && dialogBoxStr != previousOcrText) {
-                previousOcrText = dialogBoxStr
+            if (text.isNotBlank() && text != previousOcrText) {
+                if (text.isNotBlank()) {
+                    previousOcrText = text
+                }
                 translationJob?.cancel()
                 translationJob = scriptScope.launch {
                     try {
                         var translatedText = ""
                         if (prefs.translation.imageInputSwitch) {
-                            translatedText = translator.translate(text, prefs.translation.targetLanguage)?: ""
-                        } else {
                             translatedText = translator.translateImage(fullScreenshot.crop(noSubtitleRegion), prefs.translation.targetLanguage)?: ""
+                        } else {
+                            translatedText = translator.translate(text, prefs.translation.targetLanguage)?: ""
                         }
                         if (translatedText != null && isActive) {
                             subtitleNotifier.update(translatedText)
@@ -213,7 +215,12 @@ class AutoTranslate @Inject constructor(
                         }
                     }
                 }
-            } else if (dialogBoxStr.isBlank() && dialogOptionsStr.isBlank() && previousOcrText.isNotBlank()) {
+            } else if (text.isBlank() && previousOcrText != "Null") { // Uses two cycle to stop subtitle
+                previousOcrText = "Null"
+                translationJob?.cancel()
+                // Uses two cycle to stop subtitle
+                // subtitleNotifier.update("")
+            } else if (text.isBlank() && previousOcrText == "Null") {
                 previousOcrText = ""
                 translationJob?.cancel()
                 subtitleNotifier.update("")

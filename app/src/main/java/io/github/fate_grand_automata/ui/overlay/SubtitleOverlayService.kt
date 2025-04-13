@@ -71,6 +71,8 @@ import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
 import kotlin.math.roundToInt
+import kotlin.properties.Delegates
+import kotlin.ranges.coerceIn
 
 @AndroidEntryPoint
 class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
@@ -94,6 +96,12 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
     private var offsetY by mutableIntStateOf(0)
     private var isLocked by mutableStateOf(false)
     // Size state - use pixels for WindowManager
+
+    private var screenWidth by Delegates.notNull<Int>()
+    private var screenHeight by Delegates.notNull<Int>()
+
+    private var overlayWidth by mutableIntStateOf(28) // Default width in percentage
+    private var overlayHeight by mutableIntStateOf(50) // Default height in percentage
     private var overlayWidthPx by mutableIntStateOf(500) // Default width in pixels
     private var overlayHeightPx by mutableIntStateOf(150) // Default height in pixels
     private val minWidthPx = 150 // Minimum width
@@ -137,20 +145,21 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
         // Load initial state from preferences
         // offsetX = prefsCore.subtitleOverlayX.get()
         // offsetY = prefsCore.subtitleOverlayY.get()
-        // overlayWidthPx = prefsCore.subtitleOverlayWidth.get().coerceAtLeast(minWidthPx) // Load saved width
-        // overlayHeightPx = prefsCore.subtitleOverlayHeight.get().coerceAtLeast(minHeightPx) // Load saved height
         // isLocked = prefsCore.subtitleOverlayLocked.get()
         isLocked = true // TODO: the lock button will become dead after locked, make it a decoration for now
         val metrics = displayHelper.metrics
         // Use max/min to handle landscape/portrait consistently if needed,
         // but WindowManager uses absolute coords, so raw values are fine.
         // Let's assume FGA context is primarily landscape for calculation.
-        val screenWidth = kotlin.math.max(metrics.widthPixels, metrics.heightPixels)
-        val screenHeight = kotlin.math.min(metrics.widthPixels, metrics.heightPixels)
-        offsetX = (screenWidth * 0.75f).roundToInt()
-        offsetY = (screenHeight * 0.5f).roundToInt()
-        overlayWidthPx = (screenWidth * 0.25f).roundToInt()
-        overlayHeightPx = (screenHeight * 0.45f).roundToInt()
+        screenWidth = kotlin.math.max(metrics.widthPixels, metrics.heightPixels)
+        screenHeight = kotlin.math.min(metrics.widthPixels, metrics.heightPixels)
+
+        overlayWidth = prefsCore.subtitleOverlayWidth.get()
+        overlayHeight = prefsCore.subtitleOverlayHeight.get()
+        overlayWidthPx = (screenWidth * overlayWidth.toFloat() * 0.01f ).roundToInt()
+        overlayHeightPx = (screenHeight * overlayHeight.toFloat() * 0.01f ).roundToInt()
+        offsetX = screenWidth - overlayWidthPx
+        offsetY = screenHeight - overlayHeightPx
 
         layoutParams = WindowManager.LayoutParams(
             overlayWidthPx, // Use loaded width
@@ -266,6 +275,8 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
         if (!isLocked) {
             overlayWidthPx = (overlayWidthPx + dragAmountX.roundToInt()).coerceAtLeast(minWidthPx)
             overlayHeightPx = (overlayHeightPx + dragAmountY.roundToInt()).coerceAtLeast(minHeightPx)
+            overlayWidth = (overlayWidthPx.toFloat() / screenWidth.toFloat() * 100f).roundToInt().coerceIn(0,29)
+            overlayHeight = (overlayHeightPx.toFloat() / screenHeight.toFloat() * 100f).roundToInt().coerceIn(0,100)
             updateLayoutParams()
         }
     }
@@ -293,8 +304,8 @@ class SubtitleOverlayService : Service(), SavedStateRegistryOwner {
         prefsCore.subtitleOverlayX.set(offsetX)
         prefsCore.subtitleOverlayY.set(offsetY)
         prefsCore.subtitleOverlayLocked.set(isLocked)
-        prefsCore.subtitleOverlayWidth.set(overlayWidthPx) // Save width
-        prefsCore.subtitleOverlayHeight.set(overlayHeightPx) // Save height
+        prefsCore.subtitleOverlayWidth.set(overlayWidth.coerceIn(0,29)) // Save width
+        prefsCore.subtitleOverlayHeight.set(overlayHeight.coerceIn(0,100)) // Save height
     }
 
     override fun onDestroy() {

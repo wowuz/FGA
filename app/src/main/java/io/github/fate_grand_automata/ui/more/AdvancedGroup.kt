@@ -20,6 +20,7 @@ import androidx.compose.material.icons.filled.Image
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.StackedLineChart
 import androidx.compose.material.icons.filled.Translate
+import androidx.compose.material.icons.rounded.Rectangle
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CardDefaults.cardElevation
@@ -52,6 +53,7 @@ import io.github.fate_grand_automata.ui.prefs.PreferenceGroupHeader
 import io.github.fate_grand_automata.ui.prefs.SwitchPreference
 import io.github.fate_grand_automata.ui.prefs.remember
 import io.github.fate_grand_automata.ui.prefs.EditTextPreference
+import io.github.fate_grand_automata.ui.prefs.SeekBarPreference
 import io.github.fate_grand_automata.ui.prefs.StepperPreference
 
 import io.github.fate_grand_automata.util.stringRes
@@ -149,7 +151,7 @@ fun LazyListScope.advancedGroup(
     item {
         prefs.autoTranslateApiKey.EditTextPreference(
             title = "Gemini API Key",
-            summary = {"saved as plein text, not safe"}, // TODO: Localize
+            summary = { "saved as plein text, not safe" }, // TODO: Localize
             validate = { it.isNotBlank() },
             icon = icon(R.drawable.ic_key),
             singleLine = true,
@@ -162,20 +164,23 @@ fun LazyListScope.advancedGroup(
         // Consider making this a ListPreference with common language codes
         prefs.autoTranslateInstruction.EditTextPreference(
             title = "Translation instruction", // TODO: Localize
-            icon = icon(Icons.Default.Translate),)
+            icon = icon(Icons.Default.Translate),
+        )
     }
     item {
         // Consider making this a ListPreference with common language codes
         prefs.autoImageTranslateInstruction.EditTextPreference(
             title = "Image translation instruction", // TODO: Localize
-            icon = icon(Icons.Default.Translate),)
+            icon = icon(Icons.Default.Translate),
+        )
     }
 
     item {
         // Consider making this a ListPreference with common language codes
         prefs.autoTranslateTargetLanguage.EditTextPreference(
             title = "Translation target language", // TODO: Localize
-            icon = icon(Icons.Default.Translate),)
+            icon = icon(Icons.Default.Translate),
+        )
     }
 
     item {
@@ -183,7 +188,7 @@ fun LazyListScope.advancedGroup(
             title = "LLM Model",
             summary = "Used for translation, only Gemini supported for now", // TODO: Localize
             icon = icon(Icons.Default.Assistant),
-            entries =  mapOf(
+            entries = mapOf(
                 prefs.autoTranslateModel.defaultValue to prefs.autoTranslateModel.defaultValue,
                 "gemini-2.0-flash-lite" to "gemini-2.0-flash-lite",
                 "gemini-1.5-flash" to "gemini-1.5-flash",
@@ -210,6 +215,34 @@ fun LazyListScope.advancedGroup(
         )
     }
 
+    item {
+        Preference(
+            title = { Text("Subtitle overlay size in percentage of screen") },
+            summary = {
+                Column {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        prefs.subtitleOverlayWidth.SeekBarPreference(title = "Subtitle width", valueRange = 0..29)
+                    }
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        prefs.subtitleOverlayHeight.SeekBarPreference(title = "Subtitle height", valueRange = 0..100)
+                    }
+                    Text(
+                        "Translate script uses 70% of screen width, so the subtitle overlay is not allowed to be larger than 29%. If you still see the subtitle content very strangely captured itself, consider to set the width even smaller.", // TODO: Localize
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            },
+            icon = icon(Icons.Rounded.Rectangle)
+        )
+    }
     // Not Used preferences
     // item {
     //     Preference(
