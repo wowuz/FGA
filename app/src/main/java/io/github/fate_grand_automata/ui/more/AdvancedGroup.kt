@@ -306,6 +306,13 @@ fun LazyListScope.advancedGroup(
             onClick = {prefs.autoImageTranslateInstruction.resetToDefault()}
         )
     }
+    item {
+        Preference(
+            title = "Reset translation target language",
+            icon = icon(Icons.Default.Translate),
+            onClick = {prefs.autoTranslateTargetLanguage.resetToDefault()}
+        )
+    }
 }
 
 // Extracted Game Area logic for clarity
