@@ -132,8 +132,6 @@ class PrefsCore @Inject constructor(
             " You will also try to improve the translation quality according to the previous translation." +
             " Please also try to correct the possibly in-accurate OCR recognizing." +
             " You are expert in the Type-moon world, knowing all those terms and characters in type-moon stories." +
-            " 選択肢 is only a info implying that the texts inside {} are recognized in the top part of the screen, " +
-            " so please ignore the 選択肢 and the curly braces in the output." +
             " Avoid adding any explanations or annotations to the translated text."
 
     val defaultImageTranslateInstruction = "You are a highly skilled translation engine." +

@@ -180,61 +180,15 @@ class AutoTranslate @Inject constructor(
             //     runBlocking { delay(150) }
             //     subtitleNotifier.show()
             // }
-            val dialogBox = fullScreenshot.crop(
-                dialogBoxRegion
-            )
-            // dialogBox.tag = "dialogBox"
+            val noSubtitleCap= fullScreenshot.crop(noSubtitleRegion)
+            var text = ""
 
-            val dialogCharacterName = fullScreenshot.crop(
-                dialogCharacterNameRegion
-            )
-            // dialogCharacterName.tag = "dialogCharacterName"
-
-            // Could there be no dialog, only options?
-            // If so, might need to adjust the option ocr region
-            // for now just leave it like this
-            val dialogOptions = fullScreenshot.crop(
-                dialogOptionsRegion
-            )
-            // dialogOptions.tag = "dialogOptions"
-
-            var dialogBoxStr = ""
-            var dialogCharacterNameStr = ""
-            var dialogOptionsStr = ""
-
-            dialogBox.use { pattern ->
+            noSubtitleCap.use { pattern ->
                 val ocrResult = ocrService.detectText(pattern).trim()
                 if (ocrResult.isNotBlank()) {
-                    dialogBoxStr = ocrResult
+                    text = ocrResult
                 }
             }
-
-            dialogCharacterName.use { pattern ->
-                val ocrResult = ocrService.detectText(pattern).trim()
-                if (ocrResult.isNotBlank()) {
-                    dialogCharacterNameStr = ocrResult
-                }
-            }
-
-            dialogOptions.use { pattern ->
-                val ocrResult = ocrService.detectText(pattern).trim()
-                if (ocrResult.isNotBlank()) {
-                    dialogOptionsStr = ocrResult
-                }
-            }
-
-            val text = buildString {
-                if (dialogOptionsStr.length > 4) {
-                    appendLine("選択肢：{")
-                    appendLine(dialogOptionsStr+"}")
-                }
-                if (dialogCharacterNameStr.isNotBlank()) {
-                    appendLine(dialogCharacterNameStr + "：")
-                }
-                if (dialogBoxStr.isNotBlank()) {
-                    appendLine(dialogBoxStr)
-                }
-            }.trim()
 
             val similarity = similarity(text, previousOcrText)
             if (text.isNotBlank() && similarity < 0.85) { // 0.85 is not tested
