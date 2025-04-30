@@ -144,8 +144,8 @@ class PrefsCore @Inject constructor(
     // TODO: this is definitely not safe, right?
     val autoTranslateApiKey = maker.string("auto_translate_api_key", "YOUR_GEMINI_API_KEY")
     val autoTranslateTargetLanguage = maker.string("auto_translate_target_lang", "Traditional Chinese")
-    val autoTranslateInstruction = maker.string("auto_translate_target_lang", defaultTranslateInstruction)
-    val autoImageTranslateInstruction = maker.string("auto_image_translate_target_lang", defaultImageTranslateInstruction)
+    val autoTranslateInstruction = maker.string("auto_translate_instruction", defaultTranslateInstruction)
+    val autoImageTranslateInstruction = maker.string("auto_image_translate_instruction", defaultImageTranslateInstruction)
     val autoTranslateOcrRegionX = maker.int("auto_translate_ocr_region_x", 100) // Default X
     val autoTranslateOcrRegionY = maker.int("auto_translate_ocr_region_y", 50)  // Default Y
     val autoTranslateOcrRegionWidth = maker.int("auto_translate_ocr_region_width", 2360) // Default Width
